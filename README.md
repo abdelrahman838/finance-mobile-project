@@ -1,46 +1,23 @@
-# Finance App
+# MobileFinance
 
-A modern Android application for personal finance management, built with Kotlin, Android Jetpack, and Room Database following MVVM Clean Architecture.
+An Android personal finance app built with Kotlin, Jetpack Compose and Room.
 
-## Architecture & Project Structure
+## Tech Stack
 
-The project follows the standard MVVM (Model-View-ViewModel) pattern with a Repository layer:
-
-```text
-com.example.finance/
-├── data/                       # Data layer
-│   ├── local/                  # Room local persistence
-│   │   ├── dao/                # Data Access Objects (SQL queries)
-│   │   ├── entity/             # Room Database Entities (Tables)
-│   │   └── AppDatabase.kt      # RoomDatabase singleton
-│   └── repository/             # Repository pattern (single source of truth)
-│
-├── ui/                         # Presentation layer
-│   ├── MainActivity.kt
-│   └── ...
-│
-└── utils/                      # Utilities and helpers
-```
-
-## Tech Stack & Dependencies
-
-- **Language:** Kotlin
-- **Min SDK:** 24 (Android 7.0)
-- **Compile SDK:** 36 (Android 15)
-- **Architecture:** MVVM + Repository Pattern
-- **Persistence:** Room Database (SQLite abstraction)
-- **Asynchronous Work:** Kotlin Coroutines & Flow
-- **UI Toolkit:** Android Jetpack / Material Components
+- **Language:** Kotlin 2.0
+- **UI:** Jetpack Compose + Material 3
+- **Persistence:** Room (annotation processing via KSP)
+- **Min SDK:** 24 · **Compile/Target SDK:** 36
+- **Build:** Android Gradle Plugin 8.11, Gradle 8.13
 
 ## Getting Started
 
 1. Clone the repository:
    ```bash
-   git clone <repo-url>
+   git clone https://github.com/abdelrahman838/finance-mobile-project.git
    ```
-2. Open the project in **Android Studio Ladybug / Meerkat** (or later).
-3. Let Gradle sync and build the project:
+2. Open the project in Android Studio and let Gradle sync.
+3. Build and run on an emulator or device (API 24+):
    ```bash
    ./gradlew assembleDebug
    ```
-4. Run on an Android Emulator or physical device (API 24+).
