@@ -25,6 +25,10 @@ import androidx.compose.material.icons.outlined.DirectionsCar
 import androidx.compose.material.icons.outlined.MoreHoriz
 import androidx.compose.material.icons.outlined.Restaurant
 import androidx.compose.material.icons.outlined.ShoppingBag
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.KeyboardType
 
 enum class TransactionCategory(val label: String, val icon: ImageVector) {
     FOOD("Food", Icons.Outlined.Restaurant),
@@ -85,6 +89,11 @@ fun EditTransactionScreen(
             ExpenseIncomeToggle(
                 isExpense = isExpense,
                 onTypeChanged = { isExpense = it }
+            )
+
+            AmountInputField(
+                amount = amount,
+                onAmountChange = { amount = it }
             )
         }
     }
@@ -201,7 +210,6 @@ fun TransactionSummaryCard(
                 )
             }
 
-            // Amount 321
             Text(
                 text = amountText,
                 color = Lime,
@@ -286,6 +294,85 @@ fun ToggleTab(
                 fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
                 fontSize = 15.sp
             )
+        }
+    }
+}
+
+@Composable
+fun AmountInputField(
+    amount: String,
+    onAmountChange: (String) -> Unit
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        // "AMOUNT" Label
+        Text(
+            text = "AMOUNT",
+            color = Muted,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 1.sp,
+            modifier = Modifier.padding(start = 4.dp)
+        )
+
+        // Input Box
+        Surface(
+            shape = RoundedCornerShape(12.dp),
+            color = Color.White,
+            border = BorderStroke(2.dp, BrandGreen),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(64.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "$",
+                    color = Muted,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                // Editable Number Input
+                BasicTextField(
+                    value = amount,
+                    onValueChange = { newValue ->
+                        // Optional: Allow only numbers and a single decimal point
+                        if (newValue.isEmpty() || newValue.matches(Regex("^\\d*\\.?\\d*$"))) {
+                            onAmountChange(newValue)
+                        }
+                    },
+                    textStyle = TextStyle(
+                        color = Ink,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    singleLine = true,
+                    modifier = Modifier.weight(1f)
+                )
+
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = GreenSoft
+                ) {
+                    Text(
+                        text = "USD",
+                        color = BrandGreen,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                    )
+                }
+            }
         }
     }
 }
