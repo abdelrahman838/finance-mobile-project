@@ -11,7 +11,7 @@ import com.example.mobilefinance.data.local.dao.UserDao
 
 @Database(
     entities = [User::class, Transaction::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
