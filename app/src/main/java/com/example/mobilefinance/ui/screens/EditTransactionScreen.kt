@@ -80,6 +80,12 @@ fun EditTransactionScreen(
                 amountText = "$sign$$displayAmount",
                 icon = selectedCategory.icon
             )
+
+            // Expense Type Switch
+            ExpenseIncomeToggle(
+                isExpense = isExpense,
+                onTypeChanged = { isExpense = it }
+            )
         }
     }
 }
@@ -195,12 +201,90 @@ fun TransactionSummaryCard(
                 )
             }
 
-            // Amount
+            // Amount 321
             Text(
                 text = amountText,
                 color = Lime,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+@Composable
+fun ExpenseIncomeToggle(
+    isExpense: Boolean,
+    onTypeChanged: (Boolean) -> Unit
+) {
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = ChipGray,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(48.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Expense Tab
+            ToggleTab(
+                text = "Expense",
+                isSelected = isExpense,
+                indicatorColor = Red,
+                onClick = { onTypeChanged(true) },
+                modifier = Modifier.weight(1f)
+            )
+
+            // Income Tab
+            ToggleTab(
+                text = "Income",
+                isSelected = !isExpense,
+                indicatorColor = BrandGreen,
+                onClick = { onTypeChanged(false) },
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Composable
+fun ToggleTab(
+    text: String,
+    isSelected: Boolean,
+    indicatorColor: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(8.dp),
+        color = if (isSelected) Color.White else Color.Transparent,
+        shadowElevation = if (isSelected) 1.dp else 0.dp,
+        modifier = modifier.fillMaxHeight()
+    ) {
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Only show the dot indicator when the tab is selected
+            if (isSelected) {
+                Box(
+                    modifier = Modifier
+                        .size(6.dp)
+                        .background(indicatorColor, CircleShape)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+            Text(
+                text = text,
+                color = if (isSelected) Ink else Muted,
+                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
+                fontSize = 15.sp
             )
         }
     }
