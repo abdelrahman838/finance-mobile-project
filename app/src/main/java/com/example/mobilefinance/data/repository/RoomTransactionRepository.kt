@@ -19,19 +19,29 @@ class RoomTransactionRepository(
     override fun observeTransactions(): Flow<List<TransactionItem>> =
         transactionDao.getAll().map { list -> list.map(mapper::map) }
 
-    /** Puts a few rows in an empty db so the screen isn't blank while testing. */
+    override fun observeTransactionsForUser(userId: Int): Flow<List<TransactionItem>> =
+        transactionDao.getForUser(userId).map { list -> list.map(mapper::map) }
+
+    /** Puts rows for users in an empty db so screens aren't blank while testing. */
     suspend fun seedIfEmpty() {
         if (transactionDao.count() > 0) return
-        val userId = userDao.insert(User(name = "Demo")).toInt()
+
+        val alexId = userDao.insert(User(name = "Alex")).toInt()
+        val sarahId = userDao.insert(User(name = "Sarah")).toInt()
+
         transactionDao.insertAll(
             listOf(
-                Transaction(userId = userId, amount = -6.40, description = "Blue Bottle Coffee"),
-                Transaction(userId = userId, amount = -129.90, description = "H&M - Fall Fit"),
-                Transaction(userId = userId, amount = -24.00, description = "Cinema - Dune 2"),
-                Transaction(userId = userId, amount = -62.00, description = "Electric Bill"),
-                Transaction(userId = userId, amount = 3200.00, description = "Salary"),
-                Transaction(userId = userId, amount = -18.50, description = "Uber Trip Downtown"),
-                Transaction(userId = userId, amount = -84.20, description = "Whole Foods Market")
+                // User 1 (Alex) Transactions
+                Transaction(userId = alexId, amount = 3200.00, description = "Salary"),
+                Transaction(userId = alexId, amount = -84.20, description = "Whole Foods Market"),
+                Transaction(userId = alexId, amount = -18.50, description = "Uber Trip Downtown"),
+                Transaction(userId = alexId, amount = -62.00, description = "Electric Bill"),
+
+                // User 2 (Sarah) Transactions
+                Transaction(userId = sarahId, amount = 1500.00, description = "Freelance Project"),
+                Transaction(userId = sarahId, amount = -129.90, description = "H&M - Fall Fit"),
+                Transaction(userId = sarahId, amount = -24.00, description = "Cinema - Dune 2"),
+                Transaction(userId = sarahId, amount = -6.40, description = "Blue Bottle Coffee")
             )
         )
     }

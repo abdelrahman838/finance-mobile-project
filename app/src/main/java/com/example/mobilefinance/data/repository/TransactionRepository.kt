@@ -8,4 +8,5 @@ import kotlinx.coroutines.flow.Flow
  */
 interface TransactionRepository {
     fun observeTransactions(): Flow<List<TransactionItem>>
+    fun observeTransactionsForUser(userId: Int): Flow<List<TransactionItem>>
 }

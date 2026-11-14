@@ -10,6 +10,7 @@ class FakeTransactionRepository(
     private val items: List<TransactionItem> = sampleTransactions()
 ) : TransactionRepository {
     override fun observeTransactions(): Flow<List<TransactionItem>> = flowOf(items)
+    override fun observeTransactionsForUser(userId: Int): Flow<List<TransactionItem>> = flowOf(items)
 }
 
 fun sampleTransactions(now: Long = System.currentTimeMillis()): List<TransactionItem> {
