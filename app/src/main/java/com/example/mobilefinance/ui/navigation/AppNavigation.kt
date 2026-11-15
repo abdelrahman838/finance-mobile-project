@@ -13,6 +13,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.mobilefinance.EditTransactionScreen
 import com.example.mobilefinance.ui.screens.login.LoginRoute
 import com.example.mobilefinance.ui.screens.login.LoginViewModel
 import com.example.mobilefinance.ui.screens.signup.SignUpRoute
@@ -22,6 +23,7 @@ object Routes {
     const val LOGIN = "login"
     const val SIGN_UP = "sign_up"
     const val HOME = "home"
+    const val EDIT_TRANSACTION = "edit_transaction"
 }
 
 private const val KEY_SIGNED_UP_EMAIL = "signed_up_email"
@@ -46,7 +48,7 @@ fun AppNavigation() {
             LoginRoute(
                 viewModel = loginViewModel,
                 onLoginSuccess = {
-                    navController.navigate(Routes.HOME) {
+                    navController.navigate(Routes.EDIT_TRANSACTION) {
                         popUpTo(Routes.LOGIN) { inclusive = true }
                     }
                 },
@@ -79,6 +81,10 @@ fun AppNavigation() {
             ) {
                 Text("Home", style = MaterialTheme.typography.displaySmall)
             }
+        }
+
+        composable(Routes.EDIT_TRANSACTION) {
+            EditTransactionScreen()
         }
     }
 }

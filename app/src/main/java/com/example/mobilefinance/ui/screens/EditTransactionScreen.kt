@@ -30,6 +30,10 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.material3.*
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 enum class TransactionCategory(val label: String, val icon: ImageVector) {
     FOOD("Food", Icons.Outlined.Restaurant),
@@ -42,6 +46,7 @@ enum class TransactionCategory(val label: String, val icon: ImageVector) {
     MORE("More", Icons.Outlined.MoreHoriz)
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditTransactionScreen(
     // Initial values passed when a transaction is selected
@@ -60,6 +65,18 @@ fun EditTransactionScreen(
     var selectedCategory by remember { mutableStateOf(initialCategory) }
     var dateTime by remember { mutableStateOf(initialDateTime) }
     var description by remember { mutableStateOf(initialDescription) }
+    var showDatePicker by remember { mutableStateOf(false) }
+    var showTimePicker by remember { mutableStateOf(false) }
+    var tempDateMillis by remember { mutableStateOf<Long?>(null) }
+    val datePickerState = rememberDatePickerState(
+        selectableDates = object : SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                // Prevents selecting any date after the current system time
+                return utcTimeMillis <= System.currentTimeMillis()
+            }
+        }
+    )
+    val timePickerState = rememberTimePickerState()
 
     Scaffold(
         containerColor = Background
@@ -104,6 +121,88 @@ fun EditTransactionScreen(
             CategorySelectorRow(
                 selectedCategory = selectedCategory,
                 onCategorySelected = { selectedCategory = it }
+            )
+
+            DateTimeField(
+                dateTime = dateTime,
+                onClick = { showDatePicker = true }
+            )
+
+            DescriptionField(
+                description = description,
+                onDescriptionChange = { description = it },
+                onClearClick = { description = "" }
+            )
+
+            ActionButtons(
+                onUpdateClick = { /* TODO: Save and navigate back */ },
+                onDeleteClick = { /* TODO: Show confirmation dialog */ }
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+
+        // 1. Date Picker Dialog
+        if (showDatePicker) {
+            DatePickerDialog(
+                onDismissRequest = { showDatePicker = false },
+                confirmButton = {
+                    TextButton(onClick = {
+                        // Save the selected date and open the time picker
+                        tempDateMillis = datePickerState.selectedDateMillis
+                        showDatePicker = false
+                        showTimePicker = true
+                    }) {
+                        Text("Next")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDatePicker = false }) {
+                        Text("Cancel")
+                    }
+                }
+            ) {
+                DatePicker(state = datePickerState)
+            }
+        }
+
+        // 2. Time Picker Dialog
+        if (showTimePicker) {
+            AlertDialog(
+                onDismissRequest = { showTimePicker = false },
+                confirmButton = {
+                    TextButton(onClick = {
+                        // Combine Date and Time
+                        val dateStr = tempDateMillis?.let { millis ->
+                            val formatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+                            formatter.timeZone = java.util.TimeZone.getTimeZone("UTC") // Aligns DatePicker's UTC time
+                            formatter.format(Date(millis))
+                        } ?: ""
+
+                        val hour = timePickerState.hour
+                        val minute = timePickerState.minute
+                        val isPm = hour >= 12
+                        val displayHour = if (hour % 12 == 0) 12 else hour % 12
+                        val displayMinute = String.format(Locale.getDefault(), "%02d", minute)
+                        val amPm = if (isPm) "PM" else "AM"
+
+                        // Update the screen state
+                        dateTime = "$dateStr · $displayHour:$displayMinute $amPm"
+
+                        showTimePicker = false
+                    }) {
+                        Text("OK")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showTimePicker = false }) {
+                        Text("Cancel")
+                    }
+                },
+                text = {
+                    // Material 3 Time Picker
+                    TimePicker(state = timePickerState)
+                }
             )
         }
     }
@@ -471,6 +570,205 @@ fun CategoryCard(
                 text = category.label,
                 color = textColor,
                 fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+    }
+}
+
+@Composable
+fun DateTimeField(
+    dateTime: String,
+    onClick: () -> Unit
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        // Date and Time Label
+        Text(
+            text = "DATE & TIME",
+            color = InkLabel,
+            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier.padding(start = 4.dp)
+        )
+
+        // Clickable Outline Box
+        Surface(
+            onClick = onClick,
+            shape = RoundedCornerShape(12.dp),
+            color = Surface,
+            border = BorderStroke(1.dp, Outline),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.CalendarToday,
+                    contentDescription = "Calendar",
+                    tint = InkMuted,
+                    modifier = Modifier.size(20.dp)
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Text(
+                    text = dateTime,
+                    color = Ink,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.weight(1f)
+                )
+
+                Icon(
+                    imageVector = Icons.Outlined.KeyboardArrowDown,
+                    contentDescription = "Select Date",
+                    tint = InkMuted,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun DescriptionField(
+    description: String,
+    onDescriptionChange: (String) -> Unit,
+    onClearClick: () -> Unit
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        // Description Label
+        Text(
+            text = "DESCRIPTION",
+            color = InkLabel,
+            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier.padding(start = 4.dp)
+        )
+
+        // Editable Outline Box
+        Surface(
+            shape = RoundedCornerShape(12.dp),
+            color = Surface,
+            border = BorderStroke(1.dp, Outline),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Edit,
+                    contentDescription = "Edit Description",
+                    tint = InkMuted,
+                    modifier = Modifier.size(20.dp)
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                BasicTextField(
+                    value = description,
+                    onValueChange = onDescriptionChange,
+                    textStyle = TextStyle(
+                        color = Ink,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Medium
+                    ),
+                    singleLine = true,
+                    modifier = Modifier.weight(1f)
+                )
+
+                // Only show the clear 'X' if there is text to clear
+                if (description.isNotEmpty()) {
+                    IconButton(
+                        onClick = onClearClick,
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Close,
+                            contentDescription = "Clear Description",
+                            tint = InkMuted,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ActionButtons(
+    onUpdateClick: () -> Unit,
+    onDeleteClick: () -> Unit
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        // Update Transaction Button
+        Button(
+            onClick = onUpdateClick,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Green700,
+                contentColor = Surface
+            ),
+            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Check,
+                contentDescription = "Update",
+                modifier = Modifier.size(20.dp)
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Text(
+                text = "Update Transaction",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+
+        // Delete Transaction Button
+        Button(
+            onClick = onDeleteClick,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = ExpenseRedSoft,
+                contentColor = ExpenseRed
+            ),
+            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Delete,
+                contentDescription = "Delete",
+                modifier = Modifier.size(20.dp)
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Text(
+                text = "Delete Transaction",
+                fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold
             )
         }
