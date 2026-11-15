@@ -19,7 +19,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.yourapp.ui.theme.*
+import com.example.mobilefinance.ui.theme.Background
+import com.example.mobilefinance.ui.theme.ChipGray
+import com.example.mobilefinance.ui.theme.ExpenseRed
+import com.example.mobilefinance.ui.theme.Green100
+import com.example.mobilefinance.ui.theme.Green700
+import com.example.mobilefinance.ui.theme.Ink
+import com.example.mobilefinance.ui.theme.InkMuted
+import com.example.mobilefinance.ui.theme.Lime
+import com.example.mobilefinance.ui.theme.Orange
+import com.example.mobilefinance.ui.theme.Outline
+import com.example.mobilefinance.ui.theme.Peach
+import com.example.mobilefinance.ui.theme.SurfaceDark
 import androidx.compose.foundation.shape.*
 import androidx.compose.material.icons.outlined.DirectionsCar
 import androidx.compose.material.icons.outlined.MoreHoriz
@@ -57,7 +68,7 @@ fun EditTransactionScreen(
     var description by remember { mutableStateOf(initialDescription) }
 
     Scaffold(
-        containerColor = ScreenBg
+        containerColor = Background
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -140,7 +151,7 @@ fun CircularIconButton(
         onClick = onClick,
         shape = CircleShape,
         color = Color.White,
-        border = BorderStroke(1.dp, CardBorder),
+        border = BorderStroke(1.dp, Outline),
         modifier = Modifier.size(44.dp)
     ) {
         Box(contentAlignment = Alignment.Center) {
@@ -163,7 +174,7 @@ fun TransactionSummaryCard(
 ) {
     Surface(
         shape = RoundedCornerShape(24.dp),
-        color = SummaryCardBg,
+        color = SurfaceDark,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
@@ -204,7 +215,7 @@ fun TransactionSummaryCard(
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = subtitle,
-                    color = Muted,
+                    color = InkMuted,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium
                 )
@@ -242,7 +253,7 @@ fun ExpenseIncomeToggle(
             ToggleTab(
                 text = "Expense",
                 isSelected = isExpense,
-                indicatorColor = Red,
+                indicatorColor = ExpenseRed,
                 onClick = { onTypeChanged(true) },
                 modifier = Modifier.weight(1f)
             )
@@ -251,7 +262,7 @@ fun ExpenseIncomeToggle(
             ToggleTab(
                 text = "Income",
                 isSelected = !isExpense,
-                indicatorColor = BrandGreen,
+                indicatorColor = Green700,
                 onClick = { onTypeChanged(false) },
                 modifier = Modifier.weight(1f)
             )
@@ -290,7 +301,7 @@ fun ToggleTab(
             }
             Text(
                 text = text,
-                color = if (isSelected) Ink else Muted,
+                color = if (isSelected) Ink else InkMuted,
                 fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
                 fontSize = 15.sp
             )
@@ -310,7 +321,7 @@ fun AmountInputField(
         // "AMOUNT" Label
         Text(
             text = "AMOUNT",
-            color = Muted,
+            color = InkMuted,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             letterSpacing = 1.sp,
@@ -321,7 +332,7 @@ fun AmountInputField(
         Surface(
             shape = RoundedCornerShape(12.dp),
             color = Color.White,
-            border = BorderStroke(2.dp, BrandGreen),
+            border = BorderStroke(2.dp, Green700),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(64.dp)
@@ -334,7 +345,7 @@ fun AmountInputField(
             ) {
                 Text(
                     text = "$",
-                    color = Muted,
+                    color = InkMuted,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -362,11 +373,11 @@ fun AmountInputField(
 
                 Surface(
                     shape = RoundedCornerShape(16.dp),
-                    color = GreenSoft
+                    color = Green100
                 ) {
                     Text(
                         text = "USD",
-                        color = BrandGreen,
+                        color = Green700,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
