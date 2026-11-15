@@ -1,15 +1,71 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+# ---------- Gradle ----------
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/**/build/
+
+# ---------- Kotlin ----------
+.kotlin/
+
+# ---------- Local config (SDK path, secrets) ----------
 local.properties
+*.keystore
+*.jks
+!debug.keystore
+keystore.properties
+google-services.json
+secrets.properties
+.env
+
+# ---------- Android Studio / IntelliJ ----------
+*.iml
+*.ipr
+*.iws
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/usage.statistics.xml
+.idea/dictionaries/
+.idea/shelf/
+.idea/caches/
+.idea/libraries/
+.idea/modules.xml
+.idea/modules/
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+.idea/deploymentTargetDropDown.xml
+.idea/deploymentTargetSelector.xml
+.idea/appInsightsSettings.xml
+.idea/studiobot.xml
+.idea/other.xml
+.idea/artifacts/
+.idea/jarRepositories.xml
+.idea/kotlinc.xml
+.idea/vcs.xml
+.idea/inspectionProfiles/
+.idea/sonarlint/
+.idea/copilot/
+
+# ---------- Build outputs ----------
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+output.json
+release/
+/captures
+.externalNativeBuild/
+.cxx/
+
+# ---------- Logs & profiling ----------
+*.log
+*.hprof
+lint/intermediates/
+lint/generated/
+lint/outputs/
+lint/tmp/
+
+# ---------- OS files ----------
+.DS_Store
+Thumbs.db
+desktop.ini
