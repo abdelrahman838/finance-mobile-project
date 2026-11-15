@@ -5,8 +5,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material3.*
@@ -19,18 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.mobilefinance.ui.theme.Background
-import com.example.mobilefinance.ui.theme.ChipGray
-import com.example.mobilefinance.ui.theme.ExpenseRed
-import com.example.mobilefinance.ui.theme.Green100
-import com.example.mobilefinance.ui.theme.Green700
-import com.example.mobilefinance.ui.theme.Ink
-import com.example.mobilefinance.ui.theme.InkMuted
-import com.example.mobilefinance.ui.theme.Lime
-import com.example.mobilefinance.ui.theme.Orange
-import com.example.mobilefinance.ui.theme.Outline
-import com.example.mobilefinance.ui.theme.Peach
-import com.example.mobilefinance.ui.theme.SurfaceDark
+import com.example.mobilefinance.ui.theme.*
 import androidx.compose.foundation.shape.*
 import androidx.compose.material.icons.outlined.DirectionsCar
 import androidx.compose.material.icons.outlined.MoreHoriz
@@ -43,8 +33,12 @@ import androidx.compose.ui.text.input.KeyboardType
 
 enum class TransactionCategory(val label: String, val icon: ImageVector) {
     FOOD("Food", Icons.Outlined.Restaurant),
-    GROCERIES("Groceries", Icons.Outlined.ShoppingBag),
     TRANSPORT("Transport", Icons.Outlined.DirectionsCar),
+    BILLS("Bills", Icons.Outlined.Receipt),
+    SHOPPING("Shopping", Icons.Outlined.ShoppingBag),
+    FUN("Fun", Icons.Outlined.LocalActivity),
+    HEALTH("Health", Icons.Outlined.MonitorHeart),
+    TRAVEL("Travel", Icons.Outlined.Flight),
     MORE("More", Icons.Outlined.MoreHoriz)
 }
 
@@ -54,7 +48,7 @@ fun EditTransactionScreen(
     initialMerchant: String = "Whole Foods\nMarket",
     initialIsExpense: Boolean = true,
     initialAmount: String = "84.20",
-    initialCategory: TransactionCategory = TransactionCategory.GROCERIES,
+    initialCategory: TransactionCategory = TransactionCategory.SHOPPING,
     initialDateTime: String = "Oct 23, 2026 · 2:40 PM",
     initialDescription: String = "Weekly groceries + oat milk",
     onBackClick: () -> Unit = {},
@@ -105,6 +99,11 @@ fun EditTransactionScreen(
             AmountInputField(
                 amount = amount,
                 onAmountChange = { amount = it }
+            )
+
+            CategorySelectorRow(
+                selectedCategory = selectedCategory,
+                onCategorySelected = { selectedCategory = it }
             )
         }
     }
@@ -384,6 +383,96 @@ fun AmountInputField(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun CategorySelectorRow(
+    selectedCategory: TransactionCategory,
+    onCategorySelected: (TransactionCategory) -> Unit
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        // Categort label
+        Text(
+            text = "CATEGORY",
+            color = InkLabel,
+            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier.padding(start = 4.dp)
+        )
+
+        // Scrollable Row of Categories
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            TransactionCategory.entries.forEach { category ->
+                CategoryCard(
+                    category = category,
+                    isSelected = category == selectedCategory,
+                    onClick = { onCategorySelected(category) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun CategoryCard(
+    category: TransactionCategory,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    val cardBg = if (isSelected) Ink else Surface
+    val cardBorder = if (isSelected) null else BorderStroke(1.dp, Outline)
+
+    // circle around selected category
+    val iconBg = if (isSelected) Color(0xFF2D362F) else Background
+    val iconTint = if (isSelected) Lime else Ink
+    val textColor = if (isSelected) Surface else Ink
+
+    androidx.compose.material3.Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(16.dp),
+        color = cardBg,
+        border = cardBorder,
+        modifier = Modifier.size(width = 84.dp, height = 100.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            // Circular Icon Container
+            androidx.compose.material3.Surface(
+                shape = CircleShape,
+                color = iconBg,
+                modifier = Modifier.size(48.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = category.icon,
+                        contentDescription = category.label,
+                        tint = iconTint,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Category Text
+            Text(
+                text = category.label,
+                color = textColor,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold
+            )
         }
     }
 }
