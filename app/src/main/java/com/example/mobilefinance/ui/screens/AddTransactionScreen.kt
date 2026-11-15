@@ -172,18 +172,6 @@ fun AddTransactionScreen(
 
                     // =====================================================================
                     // TODO: ROOM DATABASE & VIEWMODEL CONNECTION
-                    // ---------------------------------------------------------------------
-                    // Once your Room Database DAO (e.g., TransactionDao) and ViewModel are
-                    // implemented, invoke your ViewModel insertion method here to commit the
-                    // transaction data to SQLite/Room DB.
-                    //
-                    // Example implementation:
-                    // val transactionEntity = TransactionEntity(
-                    //     userId = currentUserId, // fetched from session or user repository
-                    //     amount = if (isExpense) -parsedAmount else parsedAmount,
-                    //     description = "$merchant: $description"
-                    // )
-                    // transactionViewModel.insertTransaction(transactionEntity)
                     // =====================================================================
 
                     onSaveTransaction(
