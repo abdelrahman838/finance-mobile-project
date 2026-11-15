@@ -27,7 +27,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.yourapp.ui.theme.*
+import com.example.mobilefinance.ui.theme.*
 
 // Transaction Category Enum
 enum class TransactionCategory(val label: String, val icon: ImageVector) {
@@ -58,7 +58,7 @@ fun AddTransactionScreen(
     var description by remember { mutableStateOf("") }
 
     Scaffold(
-        containerColor = ScreenBg
+        containerColor = Background
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -90,7 +90,7 @@ fun AddTransactionScreen(
             OutlinedTextField(
                 value = merchant,
                 onValueChange = { merchant = it },
-                label = { Text("Merchant / Title", color = Muted) },
+                label = { Text("Merchant / Title", color = InkMuted) },
                 placeholder = { Text("e.g. Whole Foods, Coffee Shop") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
@@ -98,8 +98,8 @@ fun AddTransactionScreen(
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = Color.White,
                     unfocusedContainerColor = Color.White,
-                    focusedBorderColor = BrandGreen,
-                    unfocusedBorderColor = CardBorder,
+                    focusedBorderColor = Green700,
+                    unfocusedBorderColor = Outline,
                     focusedTextColor = Ink,
                     unfocusedTextColor = Ink
                 )
@@ -122,13 +122,13 @@ fun AddTransactionScreen(
             OutlinedTextField(
                 value = dateTime,
                 onValueChange = { dateTime = it },
-                label = { Text("Date & Time", color = Muted) },
+                label = { Text("Date & Time", color = InkMuted) },
                 singleLine = true,
                 trailingIcon = {
                     Icon(
                         imageVector = Icons.Default.CalendarToday,
                         contentDescription = "Select Date",
-                        tint = BrandGreen
+                        tint = Green700
                     )
                 },
                 modifier = Modifier.fillMaxWidth(),
@@ -136,8 +136,8 @@ fun AddTransactionScreen(
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = Color.White,
                     unfocusedContainerColor = Color.White,
-                    focusedBorderColor = BrandGreen,
-                    unfocusedBorderColor = CardBorder,
+                    focusedBorderColor = Green700,
+                    unfocusedBorderColor = Outline,
                     focusedTextColor = Ink,
                     unfocusedTextColor = Ink
                 )
@@ -147,7 +147,7 @@ fun AddTransactionScreen(
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it },
-                label = { Text("Description / Notes", color = Muted) },
+                label = { Text("Description / Notes", color = InkMuted) },
                 placeholder = { Text("Add any extra notes here...") },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -156,8 +156,8 @@ fun AddTransactionScreen(
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = Color.White,
                     unfocusedContainerColor = Color.White,
-                    focusedBorderColor = BrandGreen,
-                    unfocusedBorderColor = CardBorder,
+                    focusedBorderColor = Green700,
+                    unfocusedBorderColor = Outline,
                     focusedTextColor = Ink,
                     unfocusedTextColor = Ink
                 )
@@ -172,6 +172,18 @@ fun AddTransactionScreen(
 
                     // =====================================================================
                     // TODO: ROOM DATABASE & VIEWMODEL CONNECTION
+                    // ---------------------------------------------------------------------
+                    // Once your Room Database DAO (e.g., TransactionDao) and ViewModel are
+                    // implemented, invoke your ViewModel insertion method here to commit the
+                    // transaction data to SQLite/Room DB.
+                    //
+                    // Example implementation:
+                    // val transactionEntity = TransactionEntity(
+                    //     userId = currentUserId, // fetched from session or user repository
+                    //     amount = if (isExpense) -parsedAmount else parsedAmount,
+                    //     description = "$merchant: $description"
+                    // )
+                    // transactionViewModel.insertTransaction(transactionEntity)
                     // =====================================================================
 
                     onSaveTransaction(
@@ -188,7 +200,7 @@ fun AddTransactionScreen(
                     .height(54.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = BrandGreen,
+                    containerColor = Green700,
                     contentColor = Color.White
                 )
             ) {
@@ -244,7 +256,7 @@ fun CircularIconButton(
         onClick = onClick,
         shape = CircleShape,
         color = Color.White,
-        border = BorderStroke(1.dp, CardBorder),
+        border = BorderStroke(1.dp, Outline),
         modifier = Modifier.size(44.dp)
     ) {
         Box(contentAlignment = Alignment.Center) {
@@ -266,7 +278,7 @@ fun AmountInputCard(
 ) {
     Surface(
         shape = RoundedCornerShape(24.dp),
-        color = SummaryCardBg,
+        color = SurfaceDark,
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(
@@ -277,7 +289,7 @@ fun AmountInputCard(
         ) {
             Text(
                 text = if (isExpense) "EXPENSE AMOUNT" else "INCOME AMOUNT",
-                color = Muted,
+                color = InkMuted,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 1.sp
@@ -304,7 +316,7 @@ fun AmountInputCard(
                     placeholder = {
                         Text(
                             text = "0.00",
-                            color = Muted,
+                            color = InkMuted,
                             fontSize = 32.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -347,7 +359,7 @@ fun ExpenseIncomeToggle(
             ToggleTab(
                 text = "Expense",
                 isSelected = isExpense,
-                indicatorColor = Red,
+                indicatorColor = ExpenseRed,
                 onClick = { onTypeChanged(true) },
                 modifier = Modifier.weight(1f)
             )
@@ -355,7 +367,7 @@ fun ExpenseIncomeToggle(
             ToggleTab(
                 text = "Income",
                 isSelected = !isExpense,
-                indicatorColor = BrandGreen,
+                indicatorColor = Green700,
                 onClick = { onTypeChanged(false) },
                 modifier = Modifier.weight(1f)
             )
@@ -393,7 +405,7 @@ fun ToggleTab(
             }
             Text(
                 text = text,
-                color = if (isSelected) Ink else Muted,
+                color = if (isSelected) Ink else InkMuted,
                 fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
                 fontSize = 15.sp
             )
@@ -415,8 +427,8 @@ fun CategoryGrid(
             Surface(
                 onClick = { onCategorySelected(category) },
                 shape = RoundedCornerShape(16.dp),
-                color = if (isSelected) BrandGreen else Color.White,
-                border = BorderStroke(1.dp, if (isSelected) BrandGreen else CardBorder),
+                color = if (isSelected) Green700 else Color.White,
+                border = BorderStroke(1.dp, if (isSelected) Green700 else Outline),
                 modifier = Modifier
                     .weight(1f)
                     .height(72.dp)
