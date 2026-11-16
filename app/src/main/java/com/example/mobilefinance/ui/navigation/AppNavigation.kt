@@ -10,10 +10,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.mobilefinance.EditTransactionScreen
+import androidx.navigation.navArgument
+import com.example.mobilefinance.ui.screens.editTransaction.EditTransactionRoute
+import com.example.mobilefinance.ui.screens.editTransaction.EditTransactionScreenViewModel
 import com.example.mobilefinance.ui.screens.login.LoginRoute
 import com.example.mobilefinance.ui.screens.login.LoginViewModel
 import com.example.mobilefinance.ui.screens.signup.SignUpRoute
@@ -24,6 +27,9 @@ object Routes {
     const val SIGN_UP = "sign_up"
     const val HOME = "home"
     const val EDIT_TRANSACTION = "edit_transaction"
+    const val EDIT_TRANSACTION_PATTERN = "edit_transaction?transactionId={transactionId}"
+
+    fun editTransaction(transactionId: Int): String = "edit_transaction?transactionId=$transactionId"
 }
 
 private const val KEY_SIGNED_UP_EMAIL = "signed_up_email"
@@ -48,9 +54,7 @@ fun AppNavigation() {
             LoginRoute(
                 viewModel = loginViewModel,
                 onLoginSuccess = {
-                    navController.navigate(Routes.EDIT_TRANSACTION) {
-                        popUpTo(Routes.LOGIN) { inclusive = true }
-                    }
+                    navController.navigate(Routes.EDIT_TRANSACTION)
                 },
                 onCreateAccount = { navController.navigate(Routes.SIGN_UP) },
                 onForgotPassword = {}
@@ -83,8 +87,27 @@ fun AppNavigation() {
             }
         }
 
-        composable(Routes.EDIT_TRANSACTION) {
-            EditTransactionScreen()
+        composable(
+            route = Routes.EDIT_TRANSACTION_PATTERN,
+            arguments = listOf(
+                navArgument("transactionId") {
+                    type = NavType.IntType
+                    defaultValue = -1
+                }
+            )
+        ) {
+            val editViewModel: EditTransactionScreenViewModel = viewModel()
+
+            EditTransactionRoute(
+                viewModel = editViewModel,
+                onNavigateBack = {
+                    val popped = navController.popBackStack()
+                    if (!popped) {
+                        navController.navigate(Routes.HOME)
+                    }
+                },
+                onMoreClick = {}
+            )
         }
     }
 }
