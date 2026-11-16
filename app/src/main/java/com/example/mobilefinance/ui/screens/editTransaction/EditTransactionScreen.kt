@@ -1,39 +1,35 @@
-package com.example.mobilefinance
+package com.example.mobilefinance.ui.screens.editTransaction
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.mobilefinance.ui.theme.*
-import androidx.compose.foundation.shape.*
-import androidx.compose.material.icons.outlined.DirectionsCar
-import androidx.compose.material.icons.outlined.MoreHoriz
-import androidx.compose.material.icons.outlined.Restaurant
-import androidx.compose.material.icons.outlined.ShoppingBag
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.material3.*
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 enum class TransactionCategory(val label: String, val icon: ImageVector) {
     FOOD("Food", Icons.Outlined.Restaurant),
@@ -46,38 +42,75 @@ enum class TransactionCategory(val label: String, val icon: ImageVector) {
     MORE("More", Icons.Outlined.MoreHoriz)
 }
 
+@Composable
+fun EditTransactionRoute(
+    viewModel: EditTransactionScreenViewModel,
+    onNavigateBack: () -> Unit,
+    onMoreClick: () -> Unit = {}
+) {
+    val context = LocalContext.current
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    // Handle navigation when transaction is updated
+    LaunchedEffect(state.isUpdated) {
+        if (state.isUpdated) {
+            Toast.makeText(context, "Transaction updated successfully", Toast.LENGTH_SHORT).show()
+            viewModel.onUpdateHandled()
+            onNavigateBack()
+        }
+    }
+
+    // Handle navigation when transaction is deleted
+    LaunchedEffect(state.isDeleted) {
+        if (state.isDeleted) {
+            Toast.makeText(context, "Transaction deleted successfully", Toast.LENGTH_SHORT).show()
+            viewModel.onDeleteHandled()
+            onNavigateBack()
+        }
+    }
+
+    EditTransactionScreen(
+        state = state,
+        onBackClick = onNavigateBack,
+        onMoreClick = onMoreClick,
+        onTypeChanged = viewModel::onTypeChanged,
+        onAmountChange = viewModel::onAmountChange,
+        onCategorySelected = viewModel::onCategorySelected,
+        onDescriptionChange = viewModel::onDescriptionChange,
+        onClearDescription = viewModel::onClearDescription,
+        onOpenDatePicker = viewModel::onOpenDatePicker,
+        onDismissDatePicker = viewModel::onDismissDatePicker,
+        onDatePicked = viewModel::onDatePicked,
+        onDismissTimePicker = viewModel::onDismissTimePicker,
+        onTimePicked = viewModel::onTimePicked,
+        onUpdateClick = viewModel::updateTransaction,
+        onDeleteClick = viewModel::onShowDeleteConfirmation,
+        onConfirmDelete = viewModel::deleteTransaction,
+        onDismissDeleteDialog = viewModel::onDismissDeleteConfirmation
+    )
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditTransactionScreen(
-    // Initial values passed when a transaction is selected
-    initialMerchant: String = "Whole Foods\nMarket",
-    initialIsExpense: Boolean = true,
-    initialAmount: String = "84.20",
-    initialCategory: TransactionCategory = TransactionCategory.SHOPPING,
-    initialDateTime: String = "Oct 23, 2026 · 2:40 PM",
-    initialDescription: String = "Weekly groceries + oat milk",
+    state: EditTransactionUiState = EditTransactionUiState(),
     onBackClick: () -> Unit = {},
-    onMoreClick: () -> Unit = {}
+    onMoreClick: () -> Unit = {},
+    onTypeChanged: (Boolean) -> Unit = {},
+    onAmountChange: (String) -> Unit = {},
+    onCategorySelected: (TransactionCategory) -> Unit = {},
+    onDescriptionChange: (String) -> Unit = {},
+    onClearDescription: () -> Unit = {},
+    onOpenDatePicker: () -> Unit = {},
+    onDismissDatePicker: () -> Unit = {},
+    onDatePicked: (Long?) -> Unit = {},
+    onDismissTimePicker: () -> Unit = {},
+    onTimePicked: (Int, Int) -> Unit = { _, _ -> },
+    onUpdateClick: () -> Unit = {},
+    onDeleteClick: () -> Unit = {},
+    onConfirmDelete: () -> Unit = {},
+    onDismissDeleteDialog: () -> Unit = {}
 ) {
-    // Editable state that updates the UI automatically when changed:
-    var isExpense by remember { mutableStateOf(initialIsExpense) }
-    var amount by remember { mutableStateOf(initialAmount) }
-    var selectedCategory by remember { mutableStateOf(initialCategory) }
-    var dateTime by remember { mutableStateOf(initialDateTime) }
-    var description by remember { mutableStateOf(initialDescription) }
-    var showDatePicker by remember { mutableStateOf(false) }
-    var showTimePicker by remember { mutableStateOf(false) }
-    var tempDateMillis by remember { mutableStateOf<Long?>(null) }
-    val datePickerState = rememberDatePickerState(
-        selectableDates = object : SelectableDates {
-            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                // Prevents selecting any date after the current system time
-                return utcTimeMillis <= System.currentTimeMillis()
-            }
-        }
-    )
-    val timePickerState = rememberTimePickerState()
-
     Scaffold(
         containerColor = Background
     ) { innerPadding ->
@@ -96,68 +129,72 @@ fun EditTransactionScreen(
             )
 
             // Summary Card
-            val typeLabel = if (isExpense) "Expense" else "Income"
-            val sign = if (isExpense) "-" else "+"
-            val displayAmount = amount.ifEmpty { "0.00" }
-
             TransactionSummaryCard(
-                merchantName = initialMerchant,
-                subtitle = "$typeLabel · ${selectedCategory.label}",
-                amountText = "$sign$$displayAmount",
-                icon = selectedCategory.icon
+                merchantName = state.merchantName,
+                subtitle = state.subtitle,
+                amountText = state.summaryAmountText,
+                icon = state.selectedCategory.icon
             )
 
             // Expense Type Switch
             ExpenseIncomeToggle(
-                isExpense = isExpense,
-                onTypeChanged = { isExpense = it }
+                isExpense = state.isExpense,
+                onTypeChanged = onTypeChanged
             )
 
             AmountInputField(
-                amount = amount,
-                onAmountChange = { amount = it }
+                amount = state.amount,
+                onAmountChange = onAmountChange,
+                errorMessage = state.amountError
             )
 
             CategorySelectorRow(
-                selectedCategory = selectedCategory,
-                onCategorySelected = { selectedCategory = it }
+                selectedCategory = state.selectedCategory,
+                onCategorySelected = onCategorySelected
             )
 
             DateTimeField(
-                dateTime = dateTime,
-                onClick = { showDatePicker = true }
+                dateTime = state.dateTime,
+                onClick = onOpenDatePicker
             )
 
             DescriptionField(
-                description = description,
-                onDescriptionChange = { description = it },
-                onClearClick = { description = "" }
+                description = state.description,
+                onDescriptionChange = onDescriptionChange,
+                onClearClick = onClearDescription
             )
 
             ActionButtons(
-                onUpdateClick = { /* TODO: Save and navigate back */ },
-                onDeleteClick = { /* TODO: Show confirmation dialog */ }
+                onUpdateClick = onUpdateClick,
+                onDeleteClick = onDeleteClick
             )
 
             Spacer(modifier = Modifier.height(24.dp))
         }
 
         // 1. Date Picker Dialog
-        if (showDatePicker) {
+        if (state.showDatePicker) {
+            val datePickerState = rememberDatePickerState(
+                initialSelectedDateMillis = state.tempDateMillis ?: System.currentTimeMillis(),
+                selectableDates = object : SelectableDates {
+                    override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                        // Prevents selecting any date after the current system time
+                        return utcTimeMillis <= System.currentTimeMillis()
+                    }
+                }
+            )
+
             DatePickerDialog(
-                onDismissRequest = { showDatePicker = false },
+                onDismissRequest = onDismissDatePicker,
                 confirmButton = {
                     TextButton(onClick = {
-                        // Save the selected date and open the time picker
-                        tempDateMillis = datePickerState.selectedDateMillis
-                        showDatePicker = false
-                        showTimePicker = true
+                        onDatePicked(datePickerState.selectedDateMillis)
                     }) {
                         Text("Next")
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = { showDatePicker = false }) {
+                    TextButton(onClick = onDismissDatePicker) {
                         Text("Cancel")
                     }
                 }
@@ -167,41 +204,58 @@ fun EditTransactionScreen(
         }
 
         // 2. Time Picker Dialog
-        if (showTimePicker) {
+        if (state.showTimePicker) {
+            val timePickerState = rememberTimePickerState()
+
             AlertDialog(
-                onDismissRequest = { showTimePicker = false },
+                onDismissRequest = onDismissTimePicker,
                 confirmButton = {
                     TextButton(onClick = {
-                        // Combine Date and Time
-                        val dateStr = tempDateMillis?.let { millis ->
-                            val formatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-                            formatter.timeZone = java.util.TimeZone.getTimeZone("UTC") // Aligns DatePicker's UTC time
-                            formatter.format(Date(millis))
-                        } ?: ""
-
-                        val hour = timePickerState.hour
-                        val minute = timePickerState.minute
-                        val isPm = hour >= 12
-                        val displayHour = if (hour % 12 == 0) 12 else hour % 12
-                        val displayMinute = String.format(Locale.getDefault(), "%02d", minute)
-                        val amPm = if (isPm) "PM" else "AM"
-
-                        // Update the screen state
-                        dateTime = "$dateStr · $displayHour:$displayMinute $amPm"
-
-                        showTimePicker = false
+                        onTimePicked(timePickerState.hour, timePickerState.minute)
                     }) {
                         Text("OK")
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = { showTimePicker = false }) {
+                    TextButton(onClick = onDismissTimePicker) {
                         Text("Cancel")
                     }
                 },
                 text = {
-                    // Material 3 Time Picker
                     TimePicker(state = timePickerState)
+                }
+            )
+        }
+
+        // 3. Delete Confirmation Dialog
+        if (state.showDeleteConfirmation) {
+            AlertDialog(
+                onDismissRequest = onDismissDeleteDialog,
+                title = {
+                    Text(
+                        text = "Delete Transaction",
+                        fontWeight = FontWeight.Bold,
+                        color = Ink
+                    )
+                },
+                text = {
+                    Text(
+                        text = "Are you sure you want to delete this transaction? This action cannot be undone.",
+                        color = InkMuted
+                    )
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = onConfirmDelete,
+                        colors = ButtonDefaults.textButtonColors(contentColor = ExpenseRed)
+                    ) {
+                        Text("Delete", fontWeight = FontWeight.Bold)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = onDismissDeleteDialog) {
+                        Text("Cancel", color = Ink)
+                    }
                 }
             )
         }
@@ -410,7 +464,8 @@ fun ToggleTab(
 @Composable
 fun AmountInputField(
     amount: String,
-    onAmountChange: (String) -> Unit
+    onAmountChange: (String) -> Unit,
+    errorMessage: String? = null
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -430,7 +485,7 @@ fun AmountInputField(
         Surface(
             shape = RoundedCornerShape(12.dp),
             color = Color.White,
-            border = BorderStroke(2.dp, Green700),
+            border = BorderStroke(2.dp, if (errorMessage != null) ExpenseRed else Green700),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(64.dp)
@@ -454,7 +509,6 @@ fun AmountInputField(
                 BasicTextField(
                     value = amount,
                     onValueChange = { newValue ->
-                        // Optional: Allow only numbers and a single decimal point
                         if (newValue.isEmpty() || newValue.matches(Regex("^\\d*\\.?\\d*$"))) {
                             onAmountChange(newValue)
                         }
@@ -483,6 +537,15 @@ fun AmountInputField(
                 }
             }
         }
+
+        if (errorMessage != null) {
+            Text(
+                text = errorMessage,
+                color = ExpenseRed,
+                fontSize = 12.sp,
+                modifier = Modifier.padding(start = 4.dp)
+            )
+        }
     }
 }
 
@@ -495,7 +558,7 @@ fun CategorySelectorRow(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
-        // Categort label
+        // Category label
         Text(
             text = "CATEGORY",
             color = InkLabel,
@@ -535,7 +598,7 @@ fun CategoryCard(
     val iconTint = if (isSelected) Lime else Ink
     val textColor = if (isSelected) Surface else Ink
 
-    androidx.compose.material3.Surface(
+    Surface(
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),
         color = cardBg,
@@ -548,7 +611,7 @@ fun CategoryCard(
             verticalArrangement = Arrangement.Center
         ) {
             // Circular Icon Container
-            androidx.compose.material3.Surface(
+            Surface(
                 shape = CircleShape,
                 color = iconBg,
                 modifier = Modifier.size(48.dp)

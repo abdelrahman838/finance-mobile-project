@@ -1,11 +1,16 @@
 package com.example.mobilefinance.ui.screens.editTransaction
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import com.example.mobilefinance.TransactionCategory
+import androidx.lifecycle.viewModelScope
+import com.example.mobilefinance.ui.screens.dashboard.DashboardRepository
+import com.example.mobilefinance.ui.screens.dashboard.DashboardTransactionKind
+import com.example.mobilefinance.ui.screens.dashboard.SampleDashboardRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -55,10 +60,51 @@ data class EditTransactionUiState(
         get() = (amount.toDoubleOrNull() ?: 0.0) > 0.0
 }
 
-class EditTransactionScreenViewModel : ViewModel() {
+// ViewModel for Edit Transaction screen.
+class EditTransactionScreenViewModel(
+    private val savedStateHandle: SavedStateHandle = SavedStateHandle(),
+    private val repository: DashboardRepository = SampleDashboardRepository()
+) : ViewModel() {
+
+    constructor(savedStateHandle: SavedStateHandle) : this(savedStateHandle, SampleDashboardRepository())
+    constructor() : this(SavedStateHandle(), SampleDashboardRepository())
 
     private val _uiState = MutableStateFlow(EditTransactionUiState())
     val uiState: StateFlow<EditTransactionUiState> = _uiState.asStateFlow()
+
+    init {
+        // Read transactionId passed via Navigation argument (if present)
+        val transactionId = savedStateHandle.get<Int>("transactionId")
+            ?: savedStateHandle.get<String>("transactionId")?.toIntOrNull()
+
+        if (transactionId != null && transactionId > 0) {
+            loadTransactionById(transactionId)
+        }
+    }
+
+    // Loads transaction details
+    fun loadTransactionById(id: Int) {
+        viewModelScope.launch {
+            repository.observeTransactions().collect { transactions ->
+                val tx = transactions.find { it.id == id }
+                if (tx != null) {
+                    val category = mapCategory(tx.category)
+                    val dateFormatted = formatTimestamp(tx.timestampMillis)
+                    _uiState.update {
+                        it.copy(
+                            transactionId = tx.id,
+                            merchantName = tx.title,
+                            amount = String.format(Locale.US, "%.2f", tx.amount),
+                            isExpense = tx.kind == DashboardTransactionKind.EXPENSE,
+                            selectedCategory = category,
+                            dateTime = dateFormatted,
+                            description = tx.title
+                        )
+                    }
+                }
+            }
+        }
+    }
 
     fun onMerchantChange(name: String) {
         _uiState.update { it.copy(merchantName = name, merchantError = null, formError = null) }
@@ -176,6 +222,10 @@ class EditTransactionScreenViewModel : ViewModel() {
             return
         }
 
+        // Room integration point:
+        // viewModelScope.launch {
+        //     transactionRepository.update(...)
+        // }
         _uiState.update { it.copy(isUpdated = true) }
     }
 
@@ -183,6 +233,10 @@ class EditTransactionScreenViewModel : ViewModel() {
         val state = _uiState.value
         if (state.isLoading) return
 
+        // Room integration point:
+        // viewModelScope.launch {
+        //     transactionRepository.delete(state.transactionId)
+        // }
         _uiState.update {
             it.copy(
                 showDeleteConfirmation = false,
@@ -199,25 +253,23 @@ class EditTransactionScreenViewModel : ViewModel() {
         _uiState.update { it.copy(isDeleted = false) }
     }
 
-    fun loadTransaction(
-        id: Int = 0,
-        merchant: String,
-        amount: Double,
-        isExpense: Boolean,
-        category: TransactionCategory,
-        dateTime: String,
-        description: String
-    ) {
-        _uiState.update {
-            it.copy(
-                transactionId = id,
-                merchantName = merchant,
-                amount = String.format(Locale.US, "%.2f", amount),
-                isExpense = isExpense,
-                selectedCategory = category,
-                dateTime = dateTime,
-                description = description
-            )
+    // Maps category string to [TransactionCategory] enum
+    private fun mapCategory(categoryStr: String): TransactionCategory {
+        return when (categoryStr.trim().lowercase(Locale.ROOT)) {
+            "food", "groceries", "restaurant", "dinner" -> TransactionCategory.FOOD
+            "transport", "transportation", "uber", "flight" -> TransactionCategory.TRANSPORT
+            "bills", "bill", "rent", "electric bill", "utilities" -> TransactionCategory.BILLS
+            "shopping", "clothes" -> TransactionCategory.SHOPPING
+            "fun", "entertainment", "movie" -> TransactionCategory.FUN
+            "health", "medical", "pharmacy" -> TransactionCategory.HEALTH
+            "travel", "vacation" -> TransactionCategory.TRAVEL
+            else -> TransactionCategory.MORE
         }
+    }
+
+    // Formats timestamp into "MMM dd, yyyy · h:mm a"
+    private fun formatTimestamp(timestampMillis: Long): String {
+        val formatter = SimpleDateFormat("MMM dd, yyyy · h:mm a", Locale.getDefault())
+        return formatter.format(Date(timestampMillis))
     }
 }
