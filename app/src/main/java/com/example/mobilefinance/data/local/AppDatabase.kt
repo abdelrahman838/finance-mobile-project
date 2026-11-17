@@ -4,36 +4,39 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.example.financeroom.Transaction
-import com.example.financeroom.User
+import androidx.room.TypeConverters
 import com.example.mobilefinance.data.local.dao.TransactionDao
 import com.example.mobilefinance.data.local.dao.UserDao
+import com.example.mobilefinance.data.local.entity.Transaction
+import com.example.mobilefinance.data.local.entity.User
 
 @Database(
     entities = [User::class, Transaction::class],
-    version = 2,
+    version = 1,
     exportSchema = false
 )
+@TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
 
-    abstract fun transactionDao(): TransactionDao
     abstract fun userDao(): UserDao
+    abstract fun transactionDao(): TransactionDao
 
     companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
-        fun getInstance(context: Context): AppDatabase =
-            INSTANCE ?: synchronized(this) {
-                INSTANCE ?: Room.databaseBuilder(
+        fun getDatabase(context: Context): AppDatabase {
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "finance.db"
+                    "mintly_finance_db"
                 )
-                    // fine for now while the schema keeps changing
-                    .fallbackToDestructiveMigration(dropAllTables = true)
+                    .fallbackToDestructiveMigration()
                     .build()
-                    .also { INSTANCE = it }
+                INSTANCE = instance
+                instance
             }
+        }
     }
 }
