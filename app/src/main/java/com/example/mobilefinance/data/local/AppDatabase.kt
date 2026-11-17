@@ -12,7 +12,7 @@ import com.example.mobilefinance.data.local.entity.User
 
 @Database(
     entities = [User::class, Transaction::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
