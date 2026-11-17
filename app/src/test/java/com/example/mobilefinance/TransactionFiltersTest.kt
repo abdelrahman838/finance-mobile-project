@@ -59,11 +59,30 @@ class TransactionFiltersTest {
 
     @Test
     fun room_mapper_uses_sign_for_type() {
-        val expense = RoomTransactionMapper.map(Transaction(id = 1, userId = 1, amount = -10.0, description = "Coffee"))
-        val income = RoomTransactionMapper.map(Transaction(id = 2, userId = 1, amount = 50.0, description = "Gift"))
+        val expense = RoomTransactionMapper.map(
+            Transaction(id = 1, userId = 1, amount = -10.0, description = "Coffee", date = "2026-10-23", time = "14:40", category = "Food")
+        )
+        val income = RoomTransactionMapper.map(
+            Transaction(id = 2, userId = 1, amount = 50.0, description = "Gift", date = "", time = "", category = "")
+        )
         assertEquals(TransactionType.EXPENSE, expense.type)
         assertEquals(10.0, expense.amount, 0.0)
+        assertEquals("Food", expense.category)
         assertEquals(TransactionType.INCOME, income.type)
         assertEquals(TransactionItem.DEFAULT_CATEGORY, income.category)
+        assertEquals(null, income.dateMillis)
+    }
+
+    @Test
+    fun room_mapper_parses_date_and_time() {
+        val millis = RoomTransactionMapper.parseDateTime("2026-10-23", "14:40")!!
+        val cal = java.util.Calendar.getInstance().apply { timeInMillis = millis }
+        assertEquals(2026, cal.get(java.util.Calendar.YEAR))
+        assertEquals(java.util.Calendar.OCTOBER, cal.get(java.util.Calendar.MONTH))
+        assertEquals(23, cal.get(java.util.Calendar.DAY_OF_MONTH))
+        assertEquals(14, cal.get(java.util.Calendar.HOUR_OF_DAY))
+        // other formats work too, junk gives null
+        assertTrue(RoomTransactionMapper.parseDateTime("Oct 23, 2026", "2:40 PM") != null)
+        assertEquals(null, RoomTransactionMapper.parseDateTime("not a date", ""))
     }
 }
