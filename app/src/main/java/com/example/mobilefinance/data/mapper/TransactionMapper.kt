@@ -1,8 +1,9 @@
 package com.example.mobilefinance.data.mapper
 
-import com.example.financeroom.Transaction
+import com.example.mobilefinance.data.local.entity.Transaction
 import com.example.mobilefinance.data.model.TransactionItem
-import com.example.mobilefinance.data.model.TransactionType
+import com.example.mobilefinance.data.model.TransactionType as TransactionItemType
+import com.example.mobilefinance.data.local.entity.TransactionType as EntityTransactionType
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -17,18 +18,14 @@ fun interface TransactionMapper<T> {
 }
 
 /**
- * Mapper for the Room entity (id, userId, amount, description, date, time, category).
- *
- *  - negative amount = expense, positive = income (the table has no type column)
- *  - blank category falls back to "Other"
- *  - date + time are strings, we try a few common formats and use null if none fit
+ * Mapper for the Room entity (transactionId, userId, amount, category, title, description, date, time).
  */
 object RoomTransactionMapper : TransactionMapper<Transaction> {
     override fun map(source: Transaction): TransactionItem = TransactionItem(
-        id = source.id.toLong(),
-        title = source.description.ifBlank { "Untitled" },
+        id = source.transactionId,
+        title = source.title.ifBlank { source.description.ifBlank { "Untitled" } },
         amount = abs(source.amount),
-        type = if (source.amount < 0) TransactionType.EXPENSE else TransactionType.INCOME,
+        type = if (source.type == EntityTransactionType.EXPENSE) TransactionItemType.EXPENSE else TransactionItemType.INCOME,
         category = source.category.ifBlank { TransactionItem.DEFAULT_CATEGORY },
         dateMillis = parseDateTime(source.date, source.time)
     )
