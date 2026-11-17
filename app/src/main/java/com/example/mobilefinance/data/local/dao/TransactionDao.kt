@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.example.mobilefinance.data.local.entity.Transaction
+import com.example.mobilefinance.data.local.entity.TransactionCategory
 import com.example.mobilefinance.data.local.entity.TransactionType
 import kotlinx.coroutines.flow.Flow
 
@@ -46,7 +47,7 @@ interface TransactionDao {
     fun getRecentTransactions(userId: Long, limit: Int = 4): Flow<List<Transaction>>
 
     @Query("SELECT * FROM transactions WHERE userId = :userId AND category = :category ORDER BY date DESC, time DESC")
-    fun getTransactionsByCategory(userId: Long, category: String): Flow<List<Transaction>>
+    fun getTransactionsByCategory(userId: Long, category: TransactionCategory): Flow<List<Transaction>>
 
     @Query("SELECT * FROM transactions WHERE userId = :userId AND (title LIKE '%' || :query || '%' OR description LIKE '%' || :query || '%') ORDER BY date DESC, time DESC")
     fun searchTransactions(userId: Long, query: String): Flow<List<Transaction>>

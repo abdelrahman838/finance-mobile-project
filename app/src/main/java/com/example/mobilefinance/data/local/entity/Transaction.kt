@@ -21,9 +21,9 @@ data class Transaction(
     @PrimaryKey(autoGenerate = true)
     val transactionId: Long = 0,
     val userId: Long,
-    val type: TransactionType = TransactionType.EXPENSE, // Chosen first; defaults to Expense
+    val type: TransactionType = TransactionType.EXPENSE, // Defaults to Expense
     val amount: Double,
-    val category: String,
+    val category: TransactionCategory = TransactionCategory.FOOD, // Defaults to Food
     val title: String,
     val description: String = "",
     val date: String,
