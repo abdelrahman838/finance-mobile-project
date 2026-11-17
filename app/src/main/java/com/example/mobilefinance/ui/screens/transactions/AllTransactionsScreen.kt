@@ -49,11 +49,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.mobilefinance.data.repository.sampleTransactions
-import com.yourapp.ui.theme.BrandGreen
-import com.yourapp.ui.theme.CardBorder
-import com.yourapp.ui.theme.Ink
-import com.yourapp.ui.theme.Muted
-import com.yourapp.ui.theme.ScreenBg
+import com.example.mobilefinance.ui.theme.Green700
+import com.example.mobilefinance.ui.theme.Outline
+import com.example.mobilefinance.ui.theme.Ink
+import com.example.mobilefinance.ui.theme.InkMuted
+import com.example.mobilefinance.ui.theme.Background
 
 /** Hooks the screen up to its ViewModel. */
 @Composable
@@ -86,7 +86,7 @@ fun AllTransactionsContent(
     val filter = state.filter
     val hasActiveFilters = filter != TransactionFilter()
 
-    Scaffold(containerColor = ScreenBg) { innerPadding ->
+    Scaffold(containerColor = Background) { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -163,14 +163,14 @@ private fun Header(
         Column(Modifier.weight(1f)) {
             Text("Transactions", color = Ink, fontSize = 30.sp, fontWeight = FontWeight.Bold)
             val recordsText = if (shownCount == 1) "1 record" else "$shownCount records"
-            Text("$recordsText · $rangeLabel", color = Muted, fontSize = 15.sp)
+            Text("$recordsText · $rangeLabel", color = InkMuted, fontSize = 15.sp)
         }
         Box {
             Surface(
                 onClick = onResetFilters,
                 shape = CircleShape,
                 color = Color.White,
-                border = BorderStroke(1.dp, CardBorder),
+                border = BorderStroke(1.dp, Outline),
                 modifier = Modifier.size(52.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
@@ -184,7 +184,7 @@ private fun Header(
                         .align(Alignment.TopEnd)
                         .padding(4.dp)
                         .size(10.dp)
-                        .background(BrandGreen, CircleShape)
+                        .background(Green700, CircleShape)
                 )
             }
         }
@@ -222,7 +222,7 @@ private fun DateRangeDropdown(
         DropdownPill(
             text = selected.label,
             icon = Icons.Outlined.CalendarMonth,
-            iconTint = BrandGreen,
+            iconTint = Green700,
             trailing = Icons.Filled.KeyboardArrowDown,
             onClick = { expanded = true },
             modifier = Modifier.fillMaxWidth()
@@ -288,7 +288,7 @@ private fun LoadingState() {
             .fillMaxWidth()
             .padding(top = 64.dp)
     ) {
-        CircularProgressIndicator(color = BrandGreen)
+        CircularProgressIndicator(color = Green700)
     }
 }
 
@@ -303,7 +303,7 @@ private fun EmptyState(hasData: Boolean, onResetFilters: () -> Unit) {
         Icon(
             Icons.Outlined.ReceiptLong,
             contentDescription = null,
-            tint = Muted,
+            tint = InkMuted,
             modifier = Modifier.size(48.dp)
         )
         Spacer(Modifier.height(12.dp))
@@ -316,12 +316,12 @@ private fun EmptyState(hasData: Boolean, onResetFilters: () -> Unit) {
         Spacer(Modifier.height(4.dp))
         Text(
             text = if (hasData) "Try a different search or date range" else "Add one and it will show up here",
-            color = Muted,
+            color = InkMuted,
             fontSize = 14.sp
         )
         if (hasData) {
             TextButton(onClick = onResetFilters) {
-                Text("Clear filters", color = BrandGreen, fontWeight = FontWeight.SemiBold)
+                Text("Clear filters", color = Green700, fontWeight = FontWeight.SemiBold)
             }
         }
     }

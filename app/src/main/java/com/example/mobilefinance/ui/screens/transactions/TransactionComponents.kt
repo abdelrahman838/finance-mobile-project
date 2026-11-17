@@ -41,10 +41,10 @@ import com.example.mobilefinance.util.formatShortDate
 import com.example.mobilefinance.util.formatSignedMoney
 import com.example.mobilefinance.util.formatTime
 import com.example.mobilefinance.util.startOfDay
-import com.yourapp.ui.theme.BrandGreen
-import com.yourapp.ui.theme.CardBorder
-import com.yourapp.ui.theme.Ink
-import com.yourapp.ui.theme.Muted
+import com.example.mobilefinance.ui.theme.Green700
+import com.example.mobilefinance.ui.theme.Outline
+import com.example.mobilefinance.ui.theme.Ink
+import com.example.mobilefinance.ui.theme.InkMuted
 
 @Composable
 fun TransactionSearchBar(
@@ -55,7 +55,7 @@ fun TransactionSearchBar(
     Surface(
         shape = RoundedCornerShape(18.dp),
         color = Color.White,
-        border = BorderStroke(1.dp, CardBorder),
+        border = BorderStroke(1.dp, Outline),
         modifier = modifier
             .fillMaxWidth()
             .height(54.dp)
@@ -64,18 +64,18 @@ fun TransactionSearchBar(
             modifier = Modifier.padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Outlined.Search, contentDescription = null, tint = Muted)
+            Icon(Icons.Outlined.Search, contentDescription = null, tint = InkMuted)
             Spacer(Modifier.width(12.dp))
             Box(Modifier.weight(1f)) {
                 if (query.isEmpty()) {
-                    Text("Search title or note...", color = Muted, fontSize = 15.sp)
+                    Text("Search title or note...", color = InkMuted, fontSize = 15.sp)
                 }
                 BasicTextField(
                     value = query,
                     onValueChange = onQueryChange,
                     singleLine = true,
                     textStyle = TextStyle(color = Ink, fontSize = 15.sp),
-                    cursorBrush = SolidColor(BrandGreen),
+                    cursorBrush = SolidColor(Green700),
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -83,7 +83,7 @@ fun TransactionSearchBar(
                 Icon(
                     Icons.Filled.Close,
                     contentDescription = "Clear search",
-                    tint = Muted,
+                    tint = InkMuted,
                     modifier = Modifier
                         .clip(CircleShape)
                         .clickable { onQueryChange("") }
@@ -105,7 +105,7 @@ fun FilterChipPill(
         onClick = onClick,
         shape = CircleShape,
         color = if (selected) Ink else Color.White,
-        border = if (selected) null else BorderStroke(1.dp, CardBorder)
+        border = if (selected) null else BorderStroke(1.dp, Outline)
     ) {
         Text(
             text = text,
@@ -131,7 +131,7 @@ fun DropdownPill(
         onClick = onClick,
         shape = RoundedCornerShape(18.dp),
         color = Color.White,
-        border = BorderStroke(1.dp, CardBorder),
+        border = BorderStroke(1.dp, Outline),
         modifier = modifier.height(48.dp)
     ) {
         Row(
@@ -150,7 +150,7 @@ fun DropdownPill(
                 modifier = Modifier.weight(1f)
             )
             if (trailing != null) {
-                Icon(trailing, contentDescription = null, tint = Muted, modifier = Modifier.size(20.dp))
+                Icon(trailing, contentDescription = null, tint = InkMuted, modifier = Modifier.size(20.dp))
             }
         }
     }
@@ -160,7 +160,7 @@ fun DropdownPill(
 fun GroupHeader(label: String, total: Double) {
     Text(
         text = "${label.uppercase()}  ·  ${formatSignedMoney(total)}",
-        color = Muted,
+        color = InkMuted,
         fontSize = 13.sp,
         fontWeight = FontWeight.SemiBold,
         letterSpacing = 1.5.sp,
@@ -216,7 +216,7 @@ fun TransactionRow(
                 Spacer(Modifier.height(2.dp))
                 Text(
                     text = subtitleFor(item, now),
-                    color = Muted,
+                    color = InkMuted,
                     fontSize = 13.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -225,14 +225,14 @@ fun TransactionRow(
             Spacer(Modifier.width(8.dp))
             Text(
                 text = formatSignedMoney(item.signedAmount),
-                color = if (isIncome) BrandGreen else Ink,
+                color = if (isIncome) Green700 else Ink,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold
             )
         }
         if (showDivider) {
             HorizontalDivider(
-                color = CardBorder,
+                color = Outline,
                 modifier = Modifier.padding(horizontal = 18.dp)
             )
         }

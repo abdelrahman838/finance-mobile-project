@@ -13,14 +13,14 @@ import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material.icons.outlined.WorkOutline
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.yourapp.ui.theme.BrandGreen
-import com.yourapp.ui.theme.ChipGray
-import com.yourapp.ui.theme.GreenSoft
-import com.yourapp.ui.theme.Muted
-import com.yourapp.ui.theme.Orange
-import com.yourapp.ui.theme.Peach
-import com.yourapp.ui.theme.Red
-import com.yourapp.ui.theme.RedSoft
+import com.example.mobilefinance.ui.theme.Green700
+import com.example.mobilefinance.ui.theme.ChipGray
+import com.example.mobilefinance.ui.theme.Green100
+import com.example.mobilefinance.ui.theme.InkMuted
+import com.example.mobilefinance.ui.theme.Orange
+import com.example.mobilefinance.ui.theme.Peach
+import com.example.mobilefinance.ui.theme.ExpenseRed
+import com.example.mobilefinance.ui.theme.ExpenseRedSoft
 
 data class CategoryStyle(
     val icon: ImageVector,
@@ -44,10 +44,10 @@ fun categoryStyleFor(category: String): CategoryStyle = when (category.trim().lo
     "groceries" -> CategoryStyle(Icons.Outlined.ShoppingBag, Peach, Orange)
     "transport", "travel" -> CategoryStyle(Icons.Outlined.DirectionsCar, BlueSoft, Blue)
     "bills", "utilities" -> CategoryStyle(Icons.Outlined.Bolt, PurpleSoft, Purple)
-    "entertainment" -> CategoryStyle(Icons.Outlined.Movie, RedSoft, Red)
+    "entertainment" -> CategoryStyle(Icons.Outlined.Movie, ExpenseRedSoft, ExpenseRed)
     "shopping" -> CategoryStyle(Icons.Outlined.ShoppingCart, LimeSoft, Olive)
-    "income", "salary" -> CategoryStyle(Icons.Outlined.WorkOutline, GreenSoft, BrandGreen)
-    "health" -> CategoryStyle(Icons.Outlined.LocalHospital, RedSoft, Red)
+    "income", "salary" -> CategoryStyle(Icons.Outlined.WorkOutline, Green100, Green700)
+    "health" -> CategoryStyle(Icons.Outlined.LocalHospital, ExpenseRedSoft, ExpenseRed)
     "gifts" -> CategoryStyle(Icons.Outlined.CardGiftcard, PurpleSoft, Purple)
-    else -> CategoryStyle(Icons.Outlined.ReceiptLong, ChipGray, Muted)
+    else -> CategoryStyle(Icons.Outlined.ReceiptLong, ChipGray, InkMuted)
 }
