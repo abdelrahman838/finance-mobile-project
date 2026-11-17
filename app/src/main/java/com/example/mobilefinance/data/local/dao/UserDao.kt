@@ -2,22 +2,22 @@ package com.example.mobilefinance.data.local.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.example.financeroom.User
-import kotlinx.coroutines.flow.Flow
+import com.example.mobilefinance.data.local.entity.User
 
 @Dao
 interface UserDao {
 
-    @Query("SELECT * FROM users")
-    fun getAll(): Flow<List<User>>
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun registerUser(user: User): Long
 
-    @Query("SELECT * FROM users WHERE id = :id")
-    suspend fun getById(id: Int): User?
+    @Query("SELECT EXISTS(SELECT 1 FROM users WHERE username = :username)")
+    suspend fun isUsernameTaken(username: String): Boolean
 
-    @Insert
-    suspend fun insert(user: User): Long
+    @Query("SELECT * FROM users WHERE username = :username AND hashedPassword = :hashedPassword LIMIT 1")
+    suspend fun login(username: String, hashedPassword: String): User?
 
-    @Insert
-    suspend fun insertAll(users: List<User>): List<Long>
+    @Query("SELECT * FROM users WHERE userId = :userId LIMIT 1")
+    suspend fun getUserById(userId: Long): User?
 }
