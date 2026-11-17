@@ -2,10 +2,14 @@ package com.example.mobilefinance.ui.screens.editTransaction
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.example.mobilefinance.ui.screens.dashboard.DashboardRepository
-import com.example.mobilefinance.ui.screens.dashboard.DashboardTransactionKind
-import com.example.mobilefinance.ui.screens.dashboard.SampleDashboardRepository
+import androidx.lifecycle.viewmodel.CreationExtras
+import com.example.mobilefinance.data.local.dao.TransactionDao
+import com.example.mobilefinance.data.local.entity.Transaction
+import com.example.mobilefinance.data.local.entity.TransactionCategory as EntityCategory
+import com.example.mobilefinance.data.local.entity.TransactionType as EntityType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,13 +21,16 @@ import java.util.Locale
 import java.util.TimeZone
 
 data class EditTransactionUiState(
-    val transactionId: Int = 0,
+    val transactionId: Long = 0L,
+    val userId: Long = 1L,
     val merchantName: String = "Whole Foods\nMarket",
     val isExpense: Boolean = true,
     val amount: String = "84.20",
     val selectedCategory: TransactionCategory = TransactionCategory.SHOPPING,
     val dateTime: String = "Oct 23, 2026 · 2:40 PM",
     val description: String = "Weekly groceries + oat milk",
+    val rawDate: String = "",
+    val rawTime: String = "",
 
     // Dialog & Picker States
     val showDatePicker: Boolean = false,
@@ -63,45 +70,52 @@ data class EditTransactionUiState(
 // ViewModel for Edit Transaction screen.
 class EditTransactionScreenViewModel(
     private val savedStateHandle: SavedStateHandle = SavedStateHandle(),
-    private val repository: DashboardRepository = SampleDashboardRepository()
+    private val transactionDao: TransactionDao? = null
 ) : ViewModel() {
 
-    constructor(savedStateHandle: SavedStateHandle) : this(savedStateHandle, SampleDashboardRepository())
-    constructor() : this(SavedStateHandle(), SampleDashboardRepository())
+    private var loadedTransaction: Transaction? = null
 
     private val _uiState = MutableStateFlow(EditTransactionUiState())
     val uiState: StateFlow<EditTransactionUiState> = _uiState.asStateFlow()
 
     init {
-        // Read transactionId passed via Navigation argument (if present)
-        val transactionId = savedStateHandle.get<Int>("transactionId")
-            ?: savedStateHandle.get<String>("transactionId")?.toIntOrNull()
+        // Read transactionId passed via Navigation argument (Long, Int, or String)
+        val transactionId = savedStateHandle.get<Long>("transactionId")
+            ?: savedStateHandle.get<Int>("transactionId")?.toLong()
+            ?: savedStateHandle.get<String>("transactionId")?.toLongOrNull()
 
-        if (transactionId != null && transactionId > 0) {
+        if (transactionId != null && transactionId > 0L) {
             loadTransactionById(transactionId)
         }
     }
 
-    // Loads transaction details
-    fun loadTransactionById(id: Int) {
+    //Loads transaction from Room
+    fun loadTransactionById(id: Long) {
+        val dao = transactionDao ?: return
         viewModelScope.launch {
-            repository.observeTransactions().collect { transactions ->
-                val tx = transactions.find { it.id == id }
-                if (tx != null) {
-                    val category = mapCategory(tx.category)
-                    val dateFormatted = formatTimestamp(tx.timestampMillis)
-                    _uiState.update {
-                        it.copy(
-                            transactionId = tx.id,
-                            merchantName = tx.title,
-                            amount = String.format(Locale.US, "%.2f", tx.amount),
-                            isExpense = tx.kind == DashboardTransactionKind.EXPENSE,
-                            selectedCategory = category,
-                            dateTime = dateFormatted,
-                            description = tx.title
-                        )
-                    }
+            _uiState.update { it.copy(isLoading = true) }
+            val tx = dao.getTransactionById(id)
+            if (tx != null) {
+                loadedTransaction = tx
+                val uiCat = mapEntityCategoryToUi(tx.category)
+                val formattedDateTime = formatToDisplayDateTime(tx.date, tx.time)
+                _uiState.update {
+                    it.copy(
+                        transactionId = tx.transactionId,
+                        userId = tx.userId,
+                        merchantName = tx.title,
+                        amount = String.format(Locale.US, "%.2f", tx.amount),
+                        isExpense = tx.type == EntityType.EXPENSE,
+                        selectedCategory = uiCat,
+                        dateTime = formattedDateTime,
+                        description = tx.description,
+                        rawDate = tx.date,
+                        rawTime = tx.time,
+                        isLoading = false
+                    )
                 }
+            } else {
+                _uiState.update { it.copy(isLoading = false, formError = "Transaction not found") }
             }
         }
     }
@@ -162,26 +176,32 @@ class EditTransactionScreenViewModel(
     }
 
     fun onTimePicked(hour: Int, minute: Int) {
-        val dateStr = _uiState.value.tempDateMillis?.let { millis ->
-            val formatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).apply {
-                timeZone = TimeZone.getTimeZone("UTC")
-            }
-            formatter.format(Date(millis))
-        } ?: ""
+        val dateMillis = _uiState.value.tempDateMillis ?: System.currentTimeMillis()
+
+        // Format for display: MMM dd, yyyy
+        val displayDateFormatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).apply {
+            timeZone = TimeZone.getTimeZone("UTC")
+        }
+        val displayDate = displayDateFormatter.format(Date(dateMillis))
+
+        // Format for Room: yyyy-MM-dd
+        val roomDateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.US).apply {
+            timeZone = TimeZone.getTimeZone("UTC")
+        }
+        val roomDate = roomDateFormatter.format(Date(dateMillis))
 
         val isPm = hour >= 12
         val displayHour = if (hour % 12 == 0) 12 else hour % 12
         val displayMinute = String.format(Locale.getDefault(), "%02d", minute)
         val amPm = if (isPm) "PM" else "AM"
-        val formattedDateTime = if (dateStr.isNotEmpty()) {
-            "$dateStr · $displayHour:$displayMinute $amPm"
-        } else {
-            "$displayHour:$displayMinute $amPm"
-        }
+        val formattedDateTime = "$displayDate · $displayHour:$displayMinute $amPm"
+        val roomTime = String.format(Locale.US, "%02d:%02d", hour, minute)
 
         _uiState.update {
             it.copy(
                 dateTime = formattedDateTime,
+                rawDate = roomDate,
+                rawTime = roomTime,
                 showTimePicker = false,
                 tempDateMillis = null
             )
@@ -222,26 +242,78 @@ class EditTransactionScreenViewModel(
             return
         }
 
-        // Room integration point:
-        // viewModelScope.launch {
-        //     transactionRepository.update(...)
-        // }
-        _uiState.update { it.copy(isUpdated = true) }
+        val validAmount = amountVal ?: return
+
+        val dao = transactionDao
+        if (dao != null && state.transactionId > 0L) {
+            viewModelScope.launch {
+                _uiState.update { it.copy(isLoading = true) }
+                val (extractedDate, extractedTime) = if (state.rawDate.isNotEmpty() && state.rawTime.isNotEmpty()) {
+                    Pair(state.rawDate, state.rawTime)
+                } else {
+                    splitDisplayDateTime(state.dateTime)
+                }
+
+                val entityType = if (state.isExpense) EntityType.EXPENSE else EntityType.INCOME
+                val entityCategory = mapUiCategoryToEntity(state.selectedCategory)
+
+                val updated = loadedTransaction?.copy(
+                    title = state.merchantName.trim(),
+                    amount = validAmount,
+                    type = entityType,
+                    category = entityCategory,
+                    description = state.description.trim(),
+                    date = extractedDate,
+                    time = extractedTime
+                ) ?: Transaction(
+                    transactionId = state.transactionId,
+                    userId = state.userId,
+                    type = entityType,
+                    amount = validAmount,
+                    category = entityCategory,
+                    title = state.merchantName.trim(),
+                    description = state.description.trim(),
+                    date = extractedDate,
+                    time = extractedTime
+                )
+
+                dao.updateTransaction(updated)
+                _uiState.update { it.copy(isLoading = false, isUpdated = true) }
+            }
+        } else {
+            // Standalone / mock fallback
+            _uiState.update { it.copy(isUpdated = true) }
+        }
     }
 
     fun deleteTransaction() {
         val state = _uiState.value
         if (state.isLoading) return
 
-        // Room integration point:
-        // viewModelScope.launch {
-        //     transactionRepository.delete(state.transactionId)
-        // }
-        _uiState.update {
-            it.copy(
-                showDeleteConfirmation = false,
-                isDeleted = true
-            )
+        val dao = transactionDao
+        if (dao != null && state.transactionId > 0L) {
+            viewModelScope.launch {
+                _uiState.update { it.copy(isLoading = true) }
+                val toDelete = loadedTransaction ?: dao.getTransactionById(state.transactionId)
+                if (toDelete != null) {
+                    dao.deleteTransaction(toDelete)
+                }
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        showDeleteConfirmation = false,
+                        isDeleted = true
+                    )
+                }
+            }
+        } else {
+            // Standalone / mock fallback
+            _uiState.update {
+                it.copy(
+                    showDeleteConfirmation = false,
+                    isDeleted = true
+                )
+            }
         }
     }
 
@@ -253,23 +325,50 @@ class EditTransactionScreenViewModel(
         _uiState.update { it.copy(isDeleted = false) }
     }
 
-    // Maps category string to [TransactionCategory] enum
-    private fun mapCategory(categoryStr: String): TransactionCategory {
-        return when (categoryStr.trim().lowercase(Locale.ROOT)) {
-            "food", "groceries", "restaurant", "dinner" -> TransactionCategory.FOOD
-            "transport", "transportation", "uber", "flight" -> TransactionCategory.TRANSPORT
-            "bills", "bill", "rent", "electric bill", "utilities" -> TransactionCategory.BILLS
-            "shopping", "clothes" -> TransactionCategory.SHOPPING
-            "fun", "entertainment", "movie" -> TransactionCategory.FUN
-            "health", "medical", "pharmacy" -> TransactionCategory.HEALTH
-            "travel", "vacation" -> TransactionCategory.TRAVEL
-            else -> TransactionCategory.MORE
+    private fun mapEntityCategoryToUi(entityCat: EntityCategory): TransactionCategory {
+        return TransactionCategory.entries.find { it.name.equals(entityCat.name, ignoreCase = true) }
+            ?: TransactionCategory.MORE
+    }
+
+    private fun mapUiCategoryToEntity(uiCat: TransactionCategory): EntityCategory {
+        return EntityCategory.entries.find { it.name.equals(uiCat.name, ignoreCase = true) }
+            ?: EntityCategory.MORE
+    }
+
+    private fun formatToDisplayDateTime(date: String, time: String): String {
+        return try {
+            val parser = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US)
+            val dateObj = parser.parse("${date.trim()} ${time.trim()}")
+            val formatter = SimpleDateFormat("MMM dd, yyyy · h:mm a", Locale.getDefault())
+            formatter.format(dateObj ?: Date())
+        } catch (e: Exception) {
+            "${date.trim()} · ${time.trim()}"
         }
     }
 
-    // Formats timestamp into "MMM dd, yyyy · h:mm a"
-    private fun formatTimestamp(timestampMillis: Long): String {
-        val formatter = SimpleDateFormat("MMM dd, yyyy · h:mm a", Locale.getDefault())
-        return formatter.format(Date(timestampMillis))
+    private fun splitDisplayDateTime(displayStr: String): Pair<String, String> {
+        return try {
+            val parser = SimpleDateFormat("MMM dd, yyyy · h:mm a", Locale.getDefault())
+            val dateObj = parser.parse(displayStr.trim()) ?: Date()
+            val dateOut = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(dateObj)
+            val timeOut = SimpleDateFormat("HH:mm", Locale.US).format(dateObj)
+            Pair(dateOut, timeOut)
+        } catch (e: Exception) {
+            val today = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
+            val nowTime = SimpleDateFormat("HH:mm", Locale.US).format(Date())
+            Pair(today, nowTime)
+        }
+    }
+
+    companion object {
+        fun provideFactory(
+            dao: TransactionDao
+        ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+                val savedStateHandle = extras.createSavedStateHandle()
+                return EditTransactionScreenViewModel(savedStateHandle, dao) as T
+            }
+        }
     }
 }
