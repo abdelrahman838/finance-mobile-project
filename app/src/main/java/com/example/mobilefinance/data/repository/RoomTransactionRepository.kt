@@ -3,6 +3,7 @@ package com.example.mobilefinance.data.repository
 import com.example.mobilefinance.data.local.dao.TransactionDao
 import com.example.mobilefinance.data.local.dao.UserDao
 import com.example.mobilefinance.data.local.entity.Transaction
+import com.example.mobilefinance.data.local.entity.TransactionCategory
 import com.example.mobilefinance.data.local.entity.TransactionType as EntityTransactionType
 import com.example.mobilefinance.data.local.entity.User
 import com.example.mobilefinance.data.mapper.RoomTransactionMapper
@@ -37,16 +38,16 @@ class RoomTransactionRepository(
         transactionDao.insertTransactions(
             listOf(
                 // User 1 (Alex) Transactions
-                Transaction(userId = alexId, type = EntityTransactionType.INCOME, amount = 3200.00, title = "Salary", description = "Salary", date = daysAgo(1), time = "09:00", category = "Income"),
-                Transaction(userId = alexId, type = EntityTransactionType.EXPENSE, amount = 84.20, title = "Whole Foods Market", description = "Groceries", date = daysAgo(0), time = "14:40", category = "Groceries"),
-                Transaction(userId = alexId, type = EntityTransactionType.EXPENSE, amount = 18.50, title = "Uber Trip Downtown", description = "Transport", date = daysAgo(0), time = "11:15", category = "Transport"),
-                Transaction(userId = alexId, type = EntityTransactionType.EXPENSE, amount = 62.00, title = "Electric Bill", description = "Bills", date = daysAgo(1), time = "18:30", category = "Bills"),
+                Transaction(userId = alexId, type = EntityTransactionType.INCOME, amount = 3200.00, title = "Salary", description = "Salary", date = daysAgo(1), time = "09:00", category = TransactionCategory.MORE),
+                Transaction(userId = alexId, type = EntityTransactionType.EXPENSE, amount = 84.20, title = "Whole Foods Market", description = "Groceries", date = daysAgo(0), time = "14:40", category = TransactionCategory.FOOD),
+                Transaction(userId = alexId, type = EntityTransactionType.EXPENSE, amount = 18.50, title = "Uber Trip Downtown", description = "Transport", date = daysAgo(0), time = "11:15", category = TransactionCategory.TRANSPORT),
+                Transaction(userId = alexId, type = EntityTransactionType.EXPENSE, amount = 62.00, title = "Electric Bill", description = "Bills", date = daysAgo(1), time = "18:30", category = TransactionCategory.BILLS),
 
                 // User 2 (Sarah) Transactions
-                Transaction(userId = sarahId, type = EntityTransactionType.INCOME, amount = 1500.00, title = "Freelance Project", description = "Freelance", date = daysAgo(2), time = "10:00", category = "Income"),
-                Transaction(userId = sarahId, type = EntityTransactionType.EXPENSE, amount = 129.90, title = "H&M - Fall Fit", description = "Shopping", date = daysAgo(3), time = "16:20", category = "Shopping"),
-                Transaction(userId = sarahId, type = EntityTransactionType.EXPENSE, amount = 24.00, title = "Cinema - Dune 2", description = "Entertainment", date = daysAgo(1), time = "21:00", category = "Entertainment"),
-                Transaction(userId = sarahId, type = EntityTransactionType.EXPENSE, amount = 6.40, title = "Blue Bottle Coffee", description = "Food", date = daysAgo(4), time = "08:10", category = "Food")
+                Transaction(userId = sarahId, type = EntityTransactionType.INCOME, amount = 1500.00, title = "Freelance Project", description = "Freelance", date = daysAgo(2), time = "10:00", category = TransactionCategory.MORE),
+                Transaction(userId = sarahId, type = EntityTransactionType.EXPENSE, amount = 129.90, title = "H&M - Fall Fit", description = "Shopping", date = daysAgo(3), time = "16:20", category = TransactionCategory.SHOPPING),
+                Transaction(userId = sarahId, type = EntityTransactionType.EXPENSE, amount = 24.00, title = "Cinema - Dune 2", description = "Entertainment", date = daysAgo(1), time = "21:00", category = TransactionCategory.FUN),
+                Transaction(userId = sarahId, type = EntityTransactionType.EXPENSE, amount = 6.40, title = "Blue Bottle Coffee", description = "Food", date = daysAgo(4), time = "08:10", category = TransactionCategory.FOOD)
             )
         )
     }

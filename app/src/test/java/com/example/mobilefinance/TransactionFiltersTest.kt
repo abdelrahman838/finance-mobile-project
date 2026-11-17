@@ -1,6 +1,8 @@
 package com.example.mobilefinance
 
-import com.example.financeroom.Transaction
+import com.example.mobilefinance.data.local.entity.Transaction
+import com.example.mobilefinance.data.local.entity.TransactionCategory
+import com.example.mobilefinance.data.local.entity.TransactionType as EntityTransactionType
 import com.example.mobilefinance.data.mapper.RoomTransactionMapper
 import com.example.mobilefinance.data.model.TransactionItem
 import com.example.mobilefinance.data.model.TransactionType
@@ -58,18 +60,37 @@ class TransactionFiltersTest {
     }
 
     @Test
-    fun room_mapper_uses_sign_for_type() {
+    fun room_mapper_maps_entity_fields_and_categories() {
         val expense = RoomTransactionMapper.map(
-            Transaction(id = 1, userId = 1, amount = -10.0, description = "Coffee", date = "2026-10-23", time = "14:40", category = "Food")
+            Transaction(
+                transactionId = 1,
+                userId = 1,
+                type = EntityTransactionType.EXPENSE,
+                amount = 10.0,
+                category = TransactionCategory.FOOD,
+                title = "Coffee",
+                description = "Coffee",
+                date = "2026-10-23",
+                time = "14:40"
+            )
         )
         val income = RoomTransactionMapper.map(
-            Transaction(id = 2, userId = 1, amount = 50.0, description = "Gift", date = "", time = "", category = "")
+            Transaction(
+                transactionId = 2,
+                userId = 1,
+                type = EntityTransactionType.INCOME,
+                amount = 50.0,
+                title = "Gift",
+                description = "Gift",
+                date = "",
+                time = ""
+            )
         )
         assertEquals(TransactionType.EXPENSE, expense.type)
         assertEquals(10.0, expense.amount, 0.0)
         assertEquals("Food", expense.category)
         assertEquals(TransactionType.INCOME, income.type)
-        assertEquals(TransactionItem.DEFAULT_CATEGORY, income.category)
+        assertEquals("Food", income.category) // Omitting category defaults to TransactionCategory.FOOD -> "Food"
         assertEquals(null, income.dateMillis)
     }
 

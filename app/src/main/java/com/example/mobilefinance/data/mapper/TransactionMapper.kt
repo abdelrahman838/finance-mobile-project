@@ -1,6 +1,7 @@
 package com.example.mobilefinance.data.mapper
 
 import com.example.mobilefinance.data.local.entity.Transaction
+import com.example.mobilefinance.data.local.entity.TransactionCategory
 import com.example.mobilefinance.data.model.TransactionItem
 import com.example.mobilefinance.data.model.TransactionType as TransactionItemType
 import com.example.mobilefinance.data.local.entity.TransactionType as EntityTransactionType
@@ -18,7 +19,7 @@ fun interface TransactionMapper<T> {
 }
 
 /**
- * Mapper for the Room entity (transactionId, userId, amount, category, title, description, date, time).
+ * Mapper for the Room entity (transactionId, userId, type, amount, category, title, description, date, time).
  */
 object RoomTransactionMapper : TransactionMapper<Transaction> {
     override fun map(source: Transaction): TransactionItem = TransactionItem(
@@ -26,9 +27,20 @@ object RoomTransactionMapper : TransactionMapper<Transaction> {
         title = source.title.ifBlank { source.description.ifBlank { "Untitled" } },
         amount = abs(source.amount),
         type = if (source.type == EntityTransactionType.EXPENSE) TransactionItemType.EXPENSE else TransactionItemType.INCOME,
-        category = source.category.ifBlank { TransactionItem.DEFAULT_CATEGORY },
+        category = source.category.toDisplayName(),
         dateMillis = parseDateTime(source.date, source.time)
     )
+
+    private fun TransactionCategory.toDisplayName(): String = when (this) {
+        TransactionCategory.FOOD -> "Food"
+        TransactionCategory.TRANSPORT -> "Transport"
+        TransactionCategory.BILLS -> "Bills"
+        TransactionCategory.SHOPPING -> "Shopping"
+        TransactionCategory.FUN -> "Fun"
+        TransactionCategory.HEALTH -> "Health"
+        TransactionCategory.TRAVEL -> "Travel"
+        TransactionCategory.MORE -> "More"
+    }
 
     private val dateFormats = listOf("yyyy-MM-dd", "dd/MM/yyyy", "MMM d, yyyy")
     private val timeFormats = listOf("HH:mm", "h:mm a", "HH:mm:ss")
