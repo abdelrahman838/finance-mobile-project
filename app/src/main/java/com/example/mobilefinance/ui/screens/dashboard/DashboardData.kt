@@ -10,7 +10,7 @@ enum class DashboardTransactionKind { INCOME, EXPENSE }
  * The dashboard's view of a transaction. [amount] is always positive; [kind] decides the sign.
  */
 data class DashboardTransaction(
-    val id: Int,
+    val id: Long,
     val title: String,
     val category: String,
     val amount: Double,
@@ -19,9 +19,8 @@ data class DashboardTransaction(
 )
 
 /**
- * Everything the dashboard reads. Implement this on top of the Room DAO / repository
- * (e.g. `transactionDao.observeAll().map { list -> list.map { it.toDashboardTransaction() } }`)
- * and pass it to [DashboardViewModel.factory].
+ * Everything the dashboard reads. [RoomDashboardRepository] reads it from the database,
+ * [SampleDashboardRepository] returns fixed data. Pass one to [DashboardViewModel.factory].
  */
 interface DashboardRepository {
     fun observeUserName(): Flow<String>
@@ -31,7 +30,7 @@ interface DashboardRepository {
     fun observeMonthlyBudget(): Flow<Double?> = flowOf(null)
 }
 
-/** Static sample data, used by previews and until the Room repository is available. */
+/** Static sample data, for previews and quick testing. */
 class SampleDashboardRepository : DashboardRepository {
 
     override fun observeUserName(): Flow<String> = flowOf("Maya Chen")
@@ -53,7 +52,7 @@ class SampleDashboardRepository : DashboardRepository {
             set(Calendar.DAY_OF_MONTH, 1)
         }.timeInMillis
 
-        var id = 0
+        var id = 0L
         val history = (1..now.get(Calendar.MONTH)).map { m ->
             DashboardTransaction(
                 id = ++id,

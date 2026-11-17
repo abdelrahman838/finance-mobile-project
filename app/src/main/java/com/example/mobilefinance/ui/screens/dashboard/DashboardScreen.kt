@@ -107,7 +107,7 @@ fun DashboardRoute(
     viewModel: DashboardViewModel,
     onAddTransaction: () -> Unit,
     onSeeAllTransactions: () -> Unit,
-    onTransactionClick: (id: Int) -> Unit,
+    onTransactionClick: (id: Long) -> Unit,
     onSearchClick: () -> Unit,
     onNotificationsClick: () -> Unit,
     onTabSelected: (DashboardTab) -> Unit
@@ -132,7 +132,7 @@ fun DashboardScreen(
     onMonthSelected: (Int) -> Unit,
     onAddTransaction: () -> Unit,
     onSeeAllTransactions: () -> Unit,
-    onTransactionClick: (id: Int) -> Unit,
+    onTransactionClick: (id: Long) -> Unit,
     onSearchClick: () -> Unit,
     onNotificationsClick: () -> Unit,
     onTabSelected: (DashboardTab) -> Unit,
@@ -528,7 +528,7 @@ private fun SpendingChart(
 private fun RecentTransactions(
     transactions: List<DashboardTransaction>,
     onSeeAll: () -> Unit,
-    onTransactionClick: (Int) -> Unit
+    onTransactionClick: (Long) -> Unit
 ) {
     Column(modifier = Modifier.padding(horizontal = 20.dp)) {
         Spacer(Modifier.height(28.dp))
