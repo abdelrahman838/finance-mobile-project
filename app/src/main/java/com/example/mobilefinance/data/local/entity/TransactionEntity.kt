@@ -15,9 +15,16 @@ import androidx.room.PrimaryKey
     )],
     indices = [Index(value = ["userId"])]
 )
+enum class TransactionType {
+    EXPENSE,
+    INCOME
+}
 data class Transaction(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val userId: Int,
     val amount: Double,
-    val description: String
+    val description: String,
+    val date: String,
+    val time: String,
+    val category: String,
 )
