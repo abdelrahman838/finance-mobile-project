@@ -25,6 +25,7 @@ import com.example.mobilefinance.ui.screens.login.LoginRoute
 import com.example.mobilefinance.ui.screens.login.LoginViewModel
 import com.example.mobilefinance.ui.screens.signup.SignUpRoute
 import com.example.mobilefinance.ui.screens.signup.SignUpViewModel
+import com.example.mobilefinance.ui.screens.transactions.AllTransactionsRoute
 
 object Routes {
     const val LOGIN = "login"
@@ -66,8 +67,8 @@ fun AppNavigation() {
             LoginRoute(
                 viewModel = loginViewModel,
                 onLoginSuccess = {
-                    // Opens transaction #2 from Room database (dummy data) - needs to be changed
-                    navController.navigate(Routes.editTransaction(2L))
+                    // Opens the all transactions screen after login
+                    navController.navigate("transactions")
                 },
                 onCreateAccount = { navController.navigate(Routes.SIGN_UP) },
                 onForgotPassword = {}
@@ -88,6 +89,8 @@ fun AppNavigation() {
                 onLogIn = { navController.popBackStack() }
             )
         }
+
+        composable("transactions") { AllTransactionsRoute() }
 
         composable(Routes.HOME) {
             Box(
