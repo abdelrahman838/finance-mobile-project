@@ -48,6 +48,7 @@ import androidx.compose.material.icons.outlined.Receipt
 import androidx.compose.material.icons.outlined.Restaurant
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.ShoppingBag
+import androidx.compose.material.icons.outlined.SmartToy
 import androidx.compose.material.icons.outlined.Work
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -100,7 +101,7 @@ private val CardDark = Color(0xFF262E29)
 private val BarDark = Color(0xFF3A423D)
 private val OnDarkMuted = Color(0xFF8A938D)
 
-enum class DashboardTab { HOME, STATS, WALLET, PROFILE }
+enum class DashboardTab { HOME, STATS, SMARTTOY, PROFILE }
 
 @Composable
 fun DashboardRoute(
@@ -680,10 +681,10 @@ private fun DashboardBottomBar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 BottomBarItem(Icons.Outlined.Home, "Home", selected = true) { onTabSelected(DashboardTab.HOME) }
-                BottomBarItem(Icons.Outlined.PieChart, "Statistics") { onTabSelected(DashboardTab.STATS) }
+                // BottomBarItem(Icons.Outlined.PieChart, "Statistics") { onTabSelected(DashboardTab.STATS) }
                 Spacer(Modifier.weight(1f))
-                BottomBarItem(Icons.Outlined.AccountBalanceWallet, "Wallet") { onTabSelected(DashboardTab.WALLET) }
-                BottomBarItem(Icons.Outlined.PersonOutline, "Profile") { onTabSelected(DashboardTab.PROFILE) }
+                BottomBarItem(Icons.Outlined.SmartToy, "SmartToy") { onTabSelected(DashboardTab.SMARTTOY) }
+                // BottomBarItem(Icons.Outlined.PersonOutline, "Profile") { onTabSelected(DashboardTab.PROFILE) }
             }
         }
 
