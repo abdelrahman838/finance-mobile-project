@@ -43,16 +43,17 @@ import com.example.mobilefinance.ui.theme.MobileFinanceTheme
 @Composable
 fun LoginRoute(
     viewModel: LoginViewModel,
-    onLoginSuccess: () -> Unit,
+    onLoginSuccess: (userId: Long) -> Unit,
     onCreateAccount: () -> Unit,
     onForgotPassword: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(state.isLoggedIn) {
-        if (state.isLoggedIn) {
+    LaunchedEffect(state.loggedInUserId) {
+        val userId = state.loggedInUserId
+        if (userId != null) {
             viewModel.onLoginHandled()
-            onLoginSuccess()
+            onLoginSuccess(userId)
         }
     }
 

@@ -21,6 +21,9 @@ import com.example.mobilefinance.data.local.AppDatabase
 import com.example.mobilefinance.data.repository.RoomTransactionRepository
 import com.example.mobilefinance.ui.screens.editTransaction.EditTransactionRoute
 import com.example.mobilefinance.ui.screens.editTransaction.EditTransactionScreenViewModel
+import com.example.mobilefinance.ui.screens.dashboard.DashboardRoute
+import com.example.mobilefinance.ui.screens.dashboard.DashboardViewModel
+import com.example.mobilefinance.ui.screens.dashboard.RoomDashboardRepository
 import com.example.mobilefinance.ui.screens.login.LoginRoute
 import com.example.mobilefinance.ui.screens.login.LoginViewModel
 import com.example.mobilefinance.ui.screens.signup.SignUpRoute
@@ -31,6 +34,9 @@ object Routes {
     const val LOGIN = "login"
     const val SIGN_UP = "sign_up"
     const val HOME = "home"
+    const val DASHBOARD_PATTERN = "dashboard/{userId}"
+
+    fun dashboard(userId: Long): String = "dashboard/$userId"
     const val EDIT_TRANSACTION = "edit_transaction"
     const val EDIT_TRANSACTION_PATTERN = "edit_transaction?transactionId={transactionId}"
 
@@ -54,7 +60,9 @@ fun AppNavigation() {
     NavHost(navController = navController, startDestination = Routes.LOGIN) {
 
         composable(Routes.LOGIN) { entry ->
-            val loginViewModel: LoginViewModel = viewModel()
+            val loginViewModel: LoginViewModel = viewModel(
+                factory = LoginViewModel.provideFactory(database.userDao())
+            )
 
             val signedUpEmail = entry.savedStateHandle.get<String>(KEY_SIGNED_UP_EMAIL)
             LaunchedEffect(signedUpEmail) {
@@ -66,9 +74,10 @@ fun AppNavigation() {
 
             LoginRoute(
                 viewModel = loginViewModel,
-                onLoginSuccess = {
-                    // Opens the all transactions screen after login
-                    navController.navigate("transactions")
+                onLoginSuccess = { userId ->
+                    navController.navigate(Routes.dashboard(userId)) {
+                        popUpTo(Routes.LOGIN) { inclusive = true }
+                    }
                 },
                 onCreateAccount = { navController.navigate(Routes.SIGN_UP) },
                 onForgotPassword = {}
@@ -76,7 +85,9 @@ fun AppNavigation() {
         }
 
         composable(Routes.SIGN_UP) {
-            val signUpViewModel: SignUpViewModel = viewModel()
+            val signUpViewModel: SignUpViewModel = viewModel(
+                factory = SignUpViewModel.provideFactory(database.userDao())
+            )
 
             SignUpRoute(
                 viewModel = signUpViewModel,
@@ -87,6 +98,26 @@ fun AppNavigation() {
                     navController.popBackStack()
                 },
                 onLogIn = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = Routes.DASHBOARD_PATTERN,
+            arguments = listOf(navArgument("userId") { type = NavType.LongType })
+        ) { entry ->
+            val userId = entry.arguments?.getLong("userId") ?: RoomDashboardRepository.DEFAULT_USER_ID
+            val dashboardViewModel: DashboardViewModel = viewModel(
+                factory = DashboardViewModel.factory(RoomDashboardRepository.create(context, userId))
+            )
+
+            DashboardRoute(
+                viewModel = dashboardViewModel,
+                onAddTransaction = {},
+                onSeeAllTransactions = { navController.navigate("transactions") },
+                onTransactionClick = { id -> navController.navigate(Routes.editTransaction(id)) },
+                onSearchClick = {},
+                onNotificationsClick = {},
+                onTabSelected = {}
             )
         }
 
