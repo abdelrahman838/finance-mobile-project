@@ -19,6 +19,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.mobilefinance.data.local.AppDatabase
 import com.example.mobilefinance.data.repository.RoomTransactionRepository
+import com.example.mobilefinance.ui.screens.AddTransactionRoute
+import com.example.mobilefinance.ui.screens.AddTransactionScreenViewModel
 import com.example.mobilefinance.ui.screens.editTransaction.EditTransactionRoute
 import com.example.mobilefinance.ui.screens.editTransaction.EditTransactionScreenViewModel
 import com.example.mobilefinance.ui.screens.dashboard.DashboardRoute
@@ -42,6 +44,7 @@ object Routes {
 
     fun editTransaction(transactionId: Long): String = "edit_transaction?transactionId=$transactionId"
     fun editTransaction(transactionId: Int): String = "edit_transaction?transactionId=$transactionId"
+    const val ADD_TRANSACTION = "add_transaction"
 }
 
 private const val KEY_SIGNED_UP_EMAIL = "signed_up_email"
@@ -112,12 +115,22 @@ fun AppNavigation() {
 
             DashboardRoute(
                 viewModel = dashboardViewModel,
-                onAddTransaction = {},
+                onAddTransaction = { navController.navigate(Routes.ADD_TRANSACTION) },
                 onSeeAllTransactions = { navController.navigate("transactions") },
                 onTransactionClick = { id -> navController.navigate(Routes.editTransaction(id)) },
                 onSearchClick = {},
                 onNotificationsClick = {},
                 onTabSelected = {}
+            )
+        }
+
+        composable(Routes.ADD_TRANSACTION) {
+            val addViewModel: AddTransactionScreenViewModel = viewModel(
+                factory = AddTransactionScreenViewModel.provideFactory(database.transactionDao())
+            )
+            AddTransactionRoute(
+                viewModel = addViewModel,
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 
