@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -99,6 +101,7 @@ data class AddTransactionUiState(
 }
 
 class AddTransactionScreenViewModel(
+    private val savedStateHandle: SavedStateHandle = SavedStateHandle(),
     private val transactionDao: TransactionDao? = null
 ) : ViewModel() {
 
@@ -106,6 +109,12 @@ class AddTransactionScreenViewModel(
     val uiState: StateFlow<AddTransactionUiState> = _uiState.asStateFlow()
 
     init {
+        val userId = savedStateHandle.get<Long>("userId")
+            ?: savedStateHandle.get<Int>("userId")?.toLong()
+            ?: savedStateHandle.get<String>("userId")?.toLongOrNull()
+            ?: 1L
+
+        _uiState.update { it.copy(userId = userId) }
         initDefaultDateTime()
     }
 
@@ -267,7 +276,8 @@ class AddTransactionScreenViewModel(
             object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-                    return AddTransactionScreenViewModel(dao) as T
+                    val savedStateHandle = extras.createSavedStateHandle()
+                    return AddTransactionScreenViewModel(savedStateHandle, dao) as T
                 }
             }
     }

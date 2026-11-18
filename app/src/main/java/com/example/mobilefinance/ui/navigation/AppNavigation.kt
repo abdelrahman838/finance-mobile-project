@@ -44,7 +44,8 @@ object Routes {
 
     fun editTransaction(transactionId: Long): String = "edit_transaction?transactionId=$transactionId"
     fun editTransaction(transactionId: Int): String = "edit_transaction?transactionId=$transactionId"
-    const val ADD_TRANSACTION = "add_transaction"
+    const val ADD_TRANSACTION_PATTERN = "add_transaction/{userId}"
+    fun addTransaction(userId: Long): String = "add_transaction/$userId"
 }
 
 private const val KEY_SIGNED_UP_EMAIL = "signed_up_email"
@@ -115,7 +116,7 @@ fun AppNavigation() {
 
             DashboardRoute(
                 viewModel = dashboardViewModel,
-                onAddTransaction = { navController.navigate(Routes.ADD_TRANSACTION) },
+                onAddTransaction = { navController.navigate(Routes.addTransaction(userId)) },
                 onSeeAllTransactions = { navController.navigate("transactions") },
                 onTransactionClick = { id -> navController.navigate(Routes.editTransaction(id)) },
                 onSearchClick = {},
@@ -124,7 +125,10 @@ fun AppNavigation() {
             )
         }
 
-        composable(Routes.ADD_TRANSACTION) {
+        composable(
+            route = Routes.ADD_TRANSACTION_PATTERN,
+            arguments = listOf(navArgument("userId") { type = NavType.LongType })
+        ) {
             val addViewModel: AddTransactionScreenViewModel = viewModel(
                 factory = AddTransactionScreenViewModel.provideFactory(database.transactionDao())
             )
