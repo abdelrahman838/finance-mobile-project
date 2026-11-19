@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,6 +21,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.ReceiptLong
@@ -50,10 +52,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.mobilefinance.data.repository.sampleTransactions
 import com.example.mobilefinance.ui.theme.MobileFinanceTheme
 
-/** Hooks the screen up to its ViewModel. */
 @Composable
 fun AllTransactionsScreen(
     viewModel: AllTransactionsViewModel,
+    onBackClick: (() -> Unit)? = null,
     onTransactionClick: (Long) -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -64,6 +66,7 @@ fun AllTransactionsScreen(
         onDateRangeSelected = viewModel::onDateRangeSelected,
         onSortSelected = viewModel::onSortSelected,
         onResetFilters = viewModel::clearFilters,
+        onBackClick = onBackClick,
         onTransactionClick = onTransactionClick
     )
 }
@@ -76,6 +79,7 @@ fun AllTransactionsContent(
     onDateRangeSelected: (DateRange) -> Unit,
     onSortSelected: (SortOrder) -> Unit,
     onResetFilters: () -> Unit,
+    onBackClick: (() -> Unit)? = null,
     onTransactionClick: (Long) -> Unit
 ) {
     val filter = state.filter
@@ -93,7 +97,8 @@ fun AllTransactionsContent(
                     shownCount = state.shownCount,
                     rangeLabel = filter.dateRange.label,
                     hasActiveFilters = hasActiveFilters,
-                    onResetFilters = onResetFilters
+                    onResetFilters = onResetFilters,
+                    onBackClick = onBackClick
                 )
                 Spacer(Modifier.height(20.dp))
                 TransactionSearchBar(query = filter.query, onQueryChange = onQueryChange)
@@ -152,9 +157,28 @@ private fun Header(
     shownCount: Int,
     rangeLabel: String,
     hasActiveFilters: Boolean,
-    onResetFilters: () -> Unit
+    onResetFilters: () -> Unit,
+    onBackClick: (() -> Unit)? = null
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
+        if (onBackClick != null) {
+            Surface(
+                onClick = onBackClick,
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.surface,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                modifier = Modifier.size(52.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = "Back",
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+            Spacer(Modifier.width(12.dp))
+        }
         Column(Modifier.weight(1f)) {
             Text("Transactions", color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.displaySmall)
             val recordsText = if (shownCount == 1) "1 record" else "$shownCount records"
@@ -321,7 +345,6 @@ private fun EmptyState(hasData: Boolean, onResetFilters: () -> Unit) {
     }
 }
 
-/** Rounds only the outer corners so the rows of one group look like a single card. */
 private fun rowShape(index: Int, size: Int): Shape {
     val r = 24.dp
     return when {

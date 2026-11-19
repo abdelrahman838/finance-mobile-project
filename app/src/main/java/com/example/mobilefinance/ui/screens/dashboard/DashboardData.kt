@@ -6,9 +6,6 @@ import java.util.Calendar
 
 enum class DashboardTransactionKind { INCOME, EXPENSE }
 
-/**
- * The dashboard's view of a transaction. [amount] is always positive; [kind] decides the sign.
- */
 data class DashboardTransaction(
     val id: Long,
     val title: String,
@@ -18,19 +15,12 @@ data class DashboardTransaction(
     val timestampMillis: Long
 )
 
-/**
- * Everything the dashboard reads. [RoomDashboardRepository] reads it from the database,
- * [SampleDashboardRepository] returns fixed data. Pass one to [DashboardViewModel.factory].
- */
 interface DashboardRepository {
     fun observeUserName(): Flow<String>
     fun observeTransactions(): Flow<List<DashboardTransaction>>
-
-    /** Monthly spending budget, or null if the user has none. */
     fun observeMonthlyBudget(): Flow<Double?> = flowOf(null)
 }
 
-/** Static sample data, for previews and quick testing. */
 class SampleDashboardRepository : DashboardRepository {
 
     override fun observeUserName(): Flow<String> = flowOf("Maya Chen")

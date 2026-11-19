@@ -179,7 +179,6 @@ fun DashboardScreen(
     }
 }
 
-/** The header is dark, so status bar icons must be light while the dashboard is shown. */
 @Composable
 private fun LightStatusBarIcons() {
     val view = LocalView.current
@@ -193,7 +192,7 @@ private fun LightStatusBarIcons() {
     }
 }
 
-// ---------------------------------------------------------------- Header
+// Header
 
 @Composable
 private fun DashboardHeader(
@@ -216,9 +215,6 @@ private fun DashboardHeader(
         GreetingRow(
             greeting = state.greeting,
             userName = state.userName,
-            hasUnreadNotifications = hasUnreadNotifications,
-            onSearchClick = onSearchClick,
-            onNotificationsClick = onNotificationsClick,
             onAvatarClick = onAvatarClick
         )
         Spacer(Modifier.height(28.dp))
@@ -252,9 +248,6 @@ private fun DashboardHeader(
 private fun GreetingRow(
     greeting: String,
     userName: String,
-    hasUnreadNotifications: Boolean,
-    onSearchClick: () -> Unit,
-    onNotificationsClick: () -> Unit,
     onAvatarClick: () -> Unit
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -285,40 +278,6 @@ private fun GreetingRow(
                 overflow = TextOverflow.Ellipsis
             )
         }
-        HeaderIconButton(icon = Icons.Outlined.Search, contentDescription = "Search", onClick = onSearchClick)
-        Spacer(Modifier.width(12.dp))
-        Box {
-            HeaderIconButton(
-                icon = Icons.Outlined.NotificationsNone,
-                contentDescription = "Notifications",
-                onClick = onNotificationsClick
-            )
-            if (hasUnreadNotifications) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .offset(x = (-10).dp, y = 10.dp)
-                        .size(9.dp)
-                        .border(1.5.dp, CardDark, CircleShape)
-                        .clip(CircleShape)
-                        .background(Lime)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun HeaderIconButton(icon: ImageVector, contentDescription: String, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .size(48.dp)
-            .clip(CircleShape)
-            .background(CardDark)
-            .clickableNoRipple(onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(icon, contentDescription = contentDescription, tint = Color.White, modifier = Modifier.size(24.dp))
     }
 }
 
@@ -523,7 +482,7 @@ private fun SpendingChart(
     }
 }
 
-// ---------------------------------------------------------------- Transactions
+// Transactions
 
 @Composable
 private fun RecentTransactions(
@@ -651,7 +610,7 @@ private fun categoryStyle(transaction: DashboardTransaction): CategoryStyle {
     }
 }
 
-// ---------------------------------------------------------------- Bottom bar
+// Bottom bar
 
 @Composable
 private fun DashboardBottomBar(
@@ -737,7 +696,7 @@ private fun RowScope.BottomBarItem(
     }
 }
 
-// ---------------------------------------------------------------- Formatting
+// Formatting
 
 private val usSymbols = DecimalFormatSymbols(Locale.US)
 
@@ -775,7 +734,7 @@ private fun relativeDate(timestampMillis: Long): String {
     }
 }
 
-// ---------------------------------------------------------------- Previews
+// Previews
 
 @Preview(showBackground = true, heightDp = 1300)
 @Composable

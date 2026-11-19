@@ -131,7 +131,7 @@ fun FilterChipPill(
     }
 }
 
-/** The "This Month ⌄" / "Newest first" style buttons. */
+
 @Composable
 fun DropdownPill(
     text: String,
@@ -180,10 +180,6 @@ fun GroupHeader(label: String, total: Double) {
     )
 }
 
-/**
- * One row in the list. [shape] lets consecutive rows look like one card
- * while still being separate lazy items.
- */
 @Composable
 fun TransactionRow(
     item: TransactionItem,
@@ -256,11 +252,6 @@ private data class CategoryStyle(
     val tint: Color
 )
 
-/**
- * Icon + colors for a category.
- * Icons come from the app's shared category list (same as the edit screen),
- * colors only from the theme folder.
- */
 private fun categoryStyleFor(category: String, isIncome: Boolean): CategoryStyle {
     if (isIncome) return CategoryStyle(Icons.Outlined.Work, Green100, Green700)
 
@@ -278,7 +269,6 @@ private fun categoryStyleFor(category: String, isIncome: Boolean): CategoryStyle
     return CategoryStyle(shared.icon, background, tint)
 }
 
-/** "Food · 2:40 PM" for today, "Bills · Oct 22" for older ones. */
 private fun subtitleFor(item: TransactionItem, now: Long): String {
     val date = item.dateMillis ?: return item.category
     val whenText = if (date >= startOfDay(now)) formatTime(date) else formatShortDate(date)

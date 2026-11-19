@@ -13,9 +13,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 
-/**
- * Reads the dashboard data for one user from Room, through the shared [TransactionRepository].
- */
 class RoomDashboardRepository(
     private val transactionRepository: TransactionRepository,
     private val userDao: UserDao,
@@ -25,8 +22,6 @@ class RoomDashboardRepository(
     private val userTransactions: Flow<List<TransactionItem>> =
         transactionRepository.observeTransactionsForUser(userId.toInt())
 
-    // UserDao has no Flow query, so look the name up again whenever the user's rows change.
-    // This also picks up the name once the first-launch seed has inserted the user.
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun observeUserName(): Flow<String> =
         userTransactions
@@ -36,7 +31,6 @@ class RoomDashboardRepository(
     override fun observeTransactions(): Flow<List<DashboardTransaction>> =
         userTransactions.map { items -> items.mapNotNull { it.toDashboardTransaction() } }
 
-    // Rows whose date can't be parsed can't be placed in a month, so they are skipped.
     private fun TransactionItem.toDashboardTransaction(): DashboardTransaction? {
         val millis = dateMillis ?: return null
         return DashboardTransaction(
@@ -50,7 +44,6 @@ class RoomDashboardRepository(
     }
 
     companion object {
-        /** There is no logged-in user yet; the other screens use user 1 as well. */
         const val DEFAULT_USER_ID = 1L
 
         fun create(context: Context, userId: Long = DEFAULT_USER_ID): RoomDashboardRepository {

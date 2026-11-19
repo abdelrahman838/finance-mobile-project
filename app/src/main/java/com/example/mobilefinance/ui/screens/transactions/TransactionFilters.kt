@@ -36,7 +36,6 @@ data class TransactionGroup(
     val total: Double get() = items.sumOf { it.signedAmount }
 }
 
-/** Filters + sorts the list. Items without a date only show up in "All time". */
 fun List<TransactionItem>.applyFilter(
     filter: TransactionFilter,
     now: Long = System.currentTimeMillis()
@@ -72,10 +71,6 @@ private fun DateRange.startMillis(now: Long): Long? = when (this) {
     DateRange.THIS_YEAR -> startOfYear(now)
 }
 
-/**
- * Splits an already sorted list into sections like "Today", "Yesterday"...
- * Only makes sense for date sorting, for amount sorting everything goes in one group.
- */
 fun List<TransactionItem>.groupForDisplay(
     sort: SortOrder,
     now: Long = System.currentTimeMillis()

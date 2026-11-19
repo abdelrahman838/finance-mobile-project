@@ -59,6 +59,11 @@ fun AppNavigation() {
     val context = LocalContext.current
     val database = remember(context) { AppDatabase.getDatabase(context) }
 
+    // Seed test accounts and initial data if database is empty
+    LaunchedEffect(Unit) {
+        RoomTransactionRepository(database.transactionDao(), database.userDao()).seedIfEmpty()
+    }
+
     NavHost(navController = navController, startDestination = Routes.LOGIN) {
 
         composable(Routes.LOGIN) { entry ->
@@ -142,6 +147,7 @@ fun AppNavigation() {
         ) { entry ->
             val userId = entry.arguments?.getLong("userId") ?: RoomDashboardRepository.DEFAULT_USER_ID
             val transactionsViewModel: AllTransactionsViewModel = viewModel(
+                key = "all_transactions_$userId",
                 factory = AllTransactionsViewModel.Factory(
                     RoomTransactionRepository(database.transactionDao(), database.userDao()),
                     userId.toInt()
@@ -149,6 +155,7 @@ fun AppNavigation() {
             )
             AllTransactionsScreen(
                 viewModel = transactionsViewModel,
+                onBackClick = { navController.popBackStack() },
                 onTransactionClick = { id -> navController.navigate(Routes.editTransaction(id)) }
             )
         }
