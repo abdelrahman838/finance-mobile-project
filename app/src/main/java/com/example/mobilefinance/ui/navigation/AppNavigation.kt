@@ -19,8 +19,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.mobilefinance.data.local.AppDatabase
 import com.example.mobilefinance.data.repository.RoomTransactionRepository
-import com.example.mobilefinance.ui.screens.AddTransactionRoute
-import com.example.mobilefinance.ui.screens.AddTransactionScreenViewModel
+import com.example.mobilefinance.ui.screens.addTransaction.AddTransactionRoute
+import com.example.mobilefinance.ui.screens.addTransaction.AddTransactionViewModel
 import com.example.mobilefinance.ui.screens.editTransaction.EditTransactionRoute
 import com.example.mobilefinance.ui.screens.editTransaction.EditTransactionScreenViewModel
 import com.example.mobilefinance.ui.screens.dashboard.DashboardRoute
@@ -129,8 +129,8 @@ fun AppNavigation() {
             route = Routes.ADD_TRANSACTION_PATTERN,
             arguments = listOf(navArgument("userId") { type = NavType.LongType })
         ) {
-            val addViewModel: AddTransactionScreenViewModel = viewModel(
-                factory = AddTransactionScreenViewModel.provideFactory(database.transactionDao())
+            val addViewModel: AddTransactionViewModel = viewModel(
+                factory = AddTransactionViewModel.provideFactory(database.transactionDao())
             )
             AddTransactionRoute(
                 viewModel = addViewModel,
