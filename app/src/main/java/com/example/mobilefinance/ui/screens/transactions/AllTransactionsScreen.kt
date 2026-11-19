@@ -29,6 +29,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -40,20 +41,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.mobilefinance.data.repository.sampleTransactions
-import com.example.mobilefinance.ui.theme.Green700
-import com.example.mobilefinance.ui.theme.Outline
-import com.example.mobilefinance.ui.theme.Ink
-import com.example.mobilefinance.ui.theme.InkMuted
-import com.example.mobilefinance.ui.theme.Background
+import com.example.mobilefinance.ui.theme.MobileFinanceTheme
 
 /** Hooks the screen up to its ViewModel. */
 @Composable
@@ -86,7 +81,7 @@ fun AllTransactionsContent(
     val filter = state.filter
     val hasActiveFilters = filter != TransactionFilter()
 
-    Scaffold(containerColor = Background) { innerPadding ->
+    Scaffold(containerColor = MaterialTheme.colorScheme.background) { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -161,20 +156,20 @@ private fun Header(
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
-            Text("Transactions", color = Ink, fontSize = 30.sp, fontWeight = FontWeight.Bold)
+            Text("Transactions", color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.displaySmall)
             val recordsText = if (shownCount == 1) "1 record" else "$shownCount records"
-            Text("$recordsText · $rangeLabel", color = InkMuted, fontSize = 15.sp)
+            Text("$recordsText · $rangeLabel", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyLarge)
         }
         Box {
             Surface(
                 onClick = onResetFilters,
                 shape = CircleShape,
-                color = Color.White,
-                border = BorderStroke(1.dp, Outline),
+                color = MaterialTheme.colorScheme.surface,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                 modifier = Modifier.size(52.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Icon(Icons.Outlined.Tune, contentDescription = "Reset filters", tint = Ink)
+                    Icon(Icons.Outlined.Tune, contentDescription = "Reset filters", tint = MaterialTheme.colorScheme.onSurface)
                 }
             }
             // little dot so you can tell some filter is on
@@ -184,7 +179,7 @@ private fun Header(
                         .align(Alignment.TopEnd)
                         .padding(4.dp)
                         .size(10.dp)
-                        .background(Green700, CircleShape)
+                        .background(MaterialTheme.colorScheme.primary, CircleShape)
                 )
             }
         }
@@ -222,7 +217,7 @@ private fun DateRangeDropdown(
         DropdownPill(
             text = selected.label,
             icon = Icons.Outlined.CalendarMonth,
-            iconTint = Green700,
+            iconTint = MaterialTheme.colorScheme.primary,
             trailing = Icons.Filled.KeyboardArrowDown,
             onClick = { expanded = true },
             modifier = Modifier.fillMaxWidth()
@@ -257,7 +252,7 @@ private fun SortDropdown(
         DropdownPill(
             text = selected.label,
             icon = Icons.Outlined.SwapVert,
-            iconTint = Ink,
+            iconTint = MaterialTheme.colorScheme.onSurface,
             onClick = { expanded = true },
             modifier = Modifier.fillMaxWidth()
         )
@@ -288,7 +283,7 @@ private fun LoadingState() {
             .fillMaxWidth()
             .padding(top = 64.dp)
     ) {
-        CircularProgressIndicator(color = Green700)
+        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
     }
 }
 
@@ -303,25 +298,24 @@ private fun EmptyState(hasData: Boolean, onResetFilters: () -> Unit) {
         Icon(
             Icons.Outlined.ReceiptLong,
             contentDescription = null,
-            tint = InkMuted,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(48.dp)
         )
         Spacer(Modifier.height(12.dp))
         Text(
             text = if (hasData) "Nothing matches your filters" else "No transactions yet",
-            color = Ink,
-            fontSize = 17.sp,
-            fontWeight = FontWeight.SemiBold
+            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.labelLarge
         )
         Spacer(Modifier.height(4.dp))
         Text(
             text = if (hasData) "Try a different search or date range" else "Add one and it will show up here",
-            color = InkMuted,
-            fontSize = 14.sp
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodyMedium
         )
         if (hasData) {
             TextButton(onClick = onResetFilters) {
-                Text("Clear filters", color = Green700, fontWeight = FontWeight.SemiBold)
+                Text("Clear filters", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge)
             }
         }
     }
@@ -344,20 +338,22 @@ private fun AllTransactionsPreview() {
     val items = sampleTransactions()
     val filter = TransactionFilter()
     val shown = items.applyFilter(filter)
-    AllTransactionsContent(
-        state = AllTransactionsUiState(
-            isLoading = false,
-            filter = filter,
-            categories = items.map { it.category }.distinct().sorted(),
-            groups = shown.groupForDisplay(filter.sort),
-            totalCount = items.size,
-            shownCount = shown.size
-        ),
-        onQueryChange = {},
-        onCategorySelected = {},
-        onDateRangeSelected = {},
-        onSortSelected = {},
-        onResetFilters = {},
-        onTransactionClick = {}
-    )
+    MobileFinanceTheme {
+        AllTransactionsContent(
+            state = AllTransactionsUiState(
+                isLoading = false,
+                filter = filter,
+                categories = items.map { it.category }.distinct().sorted(),
+                groups = shown.groupForDisplay(filter.sort),
+                totalCount = items.size,
+                shownCount = shown.size
+            ),
+            onQueryChange = {},
+            onCategorySelected = {},
+            onDateRangeSelected = {},
+            onSortSelected = {},
+            onResetFilters = {},
+            onTransactionClick = {}
+        )
+    }
 }

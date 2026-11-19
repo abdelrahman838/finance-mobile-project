@@ -2,17 +2,8 @@ package com.example.mobilefinance.data.repository
 
 import com.example.mobilefinance.data.model.TransactionItem
 import com.example.mobilefinance.data.model.TransactionType
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 
-/** Hardcoded data for previews and quick testing. */
-class FakeTransactionRepository(
-    private val items: List<TransactionItem> = sampleTransactions()
-) : TransactionRepository {
-    override fun observeTransactions(): Flow<List<TransactionItem>> = flowOf(items)
-    override fun observeTransactionsForUser(userId: Int): Flow<List<TransactionItem>> = flowOf(items)
-}
-
+/** Hardcoded transactions for the preview and the tests. */
 fun sampleTransactions(now: Long = System.currentTimeMillis()): List<TransactionItem> {
     val hour = 60 * 60 * 1000L
     val day = 24 * hour
