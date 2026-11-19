@@ -86,8 +86,7 @@ fun AppNavigation() {
                         popUpTo(Routes.LOGIN) { inclusive = true }
                     }
                 },
-                onCreateAccount = { navController.navigate(Routes.SIGN_UP) },
-                onForgotPassword = {}
+                onCreateAccount = { navController.navigate(Routes.SIGN_UP) }
             )
         }
 
@@ -122,8 +121,6 @@ fun AppNavigation() {
                 onAddTransaction = { navController.navigate(Routes.addTransaction(userId)) },
                 onSeeAllTransactions = { navController.navigate(Routes.transactions(userId)) },
                 onTransactionClick = { id -> navController.navigate(Routes.editTransaction(id)) },
-                onSearchClick = {},
-                onNotificationsClick = {},
                 onTabSelected = {}
             )
         }

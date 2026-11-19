@@ -41,12 +41,10 @@ import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.Flight
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LocalActivity
-import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.material.icons.outlined.PersonOutline
 import androidx.compose.material.icons.outlined.PieChart
 import androidx.compose.material.icons.outlined.Receipt
 import androidx.compose.material.icons.outlined.Restaurant
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material.icons.outlined.SmartToy
 import androidx.compose.material.icons.outlined.Work
@@ -109,8 +107,6 @@ fun DashboardRoute(
     onAddTransaction: () -> Unit,
     onSeeAllTransactions: () -> Unit,
     onTransactionClick: (id: Long) -> Unit,
-    onSearchClick: () -> Unit,
-    onNotificationsClick: () -> Unit,
     onTabSelected: (DashboardTab) -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -121,8 +117,6 @@ fun DashboardRoute(
         onAddTransaction = onAddTransaction,
         onSeeAllTransactions = onSeeAllTransactions,
         onTransactionClick = onTransactionClick,
-        onSearchClick = onSearchClick,
-        onNotificationsClick = onNotificationsClick,
         onTabSelected = onTabSelected
     )
 }
@@ -134,10 +128,7 @@ fun DashboardScreen(
     onAddTransaction: () -> Unit,
     onSeeAllTransactions: () -> Unit,
     onTransactionClick: (id: Long) -> Unit,
-    onSearchClick: () -> Unit,
-    onNotificationsClick: () -> Unit,
-    onTabSelected: (DashboardTab) -> Unit,
-    hasUnreadNotifications: Boolean = false
+    onTabSelected: (DashboardTab) -> Unit
 ) {
     LightStatusBarIcons()
 
@@ -155,10 +146,7 @@ fun DashboardScreen(
             item {
                 DashboardHeader(
                     state = state,
-                    hasUnreadNotifications = hasUnreadNotifications,
                     onMonthSelected = onMonthSelected,
-                    onSearchClick = onSearchClick,
-                    onNotificationsClick = onNotificationsClick,
                     onAvatarClick = { onTabSelected(DashboardTab.PROFILE) }
                 )
             }
@@ -197,10 +185,7 @@ private fun LightStatusBarIcons() {
 @Composable
 private fun DashboardHeader(
     state: DashboardUiState,
-    hasUnreadNotifications: Boolean,
     onMonthSelected: (Int) -> Unit,
-    onSearchClick: () -> Unit,
-    onNotificationsClick: () -> Unit,
     onAvatarClick: () -> Unit
 ) {
     Column(
@@ -765,10 +750,7 @@ private fun DashboardScreenPreview() {
             onAddTransaction = {},
             onSeeAllTransactions = {},
             onTransactionClick = {},
-            onSearchClick = {},
-            onNotificationsClick = {},
-            onTabSelected = {},
-            hasUnreadNotifications = true
+            onTabSelected = {}
         )
     }
 }
@@ -783,8 +765,6 @@ private fun DashboardScreenEmptyPreview() {
             onAddTransaction = {},
             onSeeAllTransactions = {},
             onTransactionClick = {},
-            onSearchClick = {},
-            onNotificationsClick = {},
             onTabSelected = {}
         )
     }
