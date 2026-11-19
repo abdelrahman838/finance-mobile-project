@@ -1,11 +1,9 @@
 package com.example.mobilefinance.ui.screens.login
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
@@ -16,14 +14,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -36,16 +31,13 @@ import com.example.mobilefinance.ui.components.AuthPasswordField
 import com.example.mobilefinance.ui.components.AuthTextField
 import com.example.mobilefinance.ui.components.FormErrorBanner
 import com.example.mobilefinance.ui.components.PrimaryButton
-import com.example.mobilefinance.ui.components.clickableNoRipple
-import com.example.mobilefinance.ui.theme.Green700
 import com.example.mobilefinance.ui.theme.MobileFinanceTheme
 
 @Composable
 fun LoginRoute(
     viewModel: LoginViewModel,
     onLoginSuccess: (userId: Long) -> Unit,
-    onCreateAccount: () -> Unit,
-    onForgotPassword: () -> Unit
+    onCreateAccount: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -62,7 +54,6 @@ fun LoginRoute(
         onEmailChange = viewModel::onEmailChange,
         onPasswordChange = viewModel::onPasswordChange,
         onLoginClick = viewModel::login,
-        onForgotPassword = onForgotPassword,
         onCreateAccount = onCreateAccount
     )
 }
@@ -73,7 +64,6 @@ fun LoginScreen(
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onLoginClick: () -> Unit,
-    onForgotPassword: () -> Unit,
     onCreateAccount: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
@@ -128,20 +118,7 @@ fun LoginScreen(
                 }
             )
 
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                Text(
-                    text = "Forgot Password?",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Green700,
-                    modifier = Modifier
-                        .clickableNoRipple(onForgotPassword)
-                        .padding(vertical = 14.dp)
-                )
-            }
+            Spacer(Modifier.height(24.dp))
 
             PrimaryButton(
                 text = "Log In",
@@ -172,7 +149,6 @@ private fun LoginScreenPreview() {
             onEmailChange = {},
             onPasswordChange = {},
             onLoginClick = {},
-            onForgotPassword = {},
             onCreateAccount = {}
         )
     }
