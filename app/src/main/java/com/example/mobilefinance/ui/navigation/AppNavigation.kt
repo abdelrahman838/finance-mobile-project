@@ -30,7 +30,8 @@ import com.example.mobilefinance.ui.screens.login.LoginRoute
 import com.example.mobilefinance.ui.screens.login.LoginViewModel
 import com.example.mobilefinance.ui.screens.signup.SignUpRoute
 import com.example.mobilefinance.ui.screens.signup.SignUpViewModel
-import com.example.mobilefinance.ui.screens.transactions.AllTransactionsRoute
+import com.example.mobilefinance.ui.screens.transactions.AllTransactionsScreen
+import com.example.mobilefinance.ui.screens.transactions.AllTransactionsViewModel
 
 object Routes {
     const val LOGIN = "login"
@@ -46,6 +47,8 @@ object Routes {
     fun editTransaction(transactionId: Int): String = "edit_transaction?transactionId=$transactionId"
     const val ADD_TRANSACTION_PATTERN = "add_transaction/{userId}"
     fun addTransaction(userId: Long): String = "add_transaction/$userId"
+    const val TRANSACTIONS_PATTERN = "transactions/{userId}"
+    fun transactions(userId: Long): String = "transactions/$userId"
 }
 
 private const val KEY_SIGNED_UP_EMAIL = "signed_up_email"
@@ -55,11 +58,6 @@ fun AppNavigation() {
     val navController = rememberNavController()
     val context = LocalContext.current
     val database = remember(context) { AppDatabase.getDatabase(context) }
-
-    // Seed test rows in Room so database has initial transactions if empty
-    LaunchedEffect(Unit) {
-        RoomTransactionRepository(database.transactionDao(), database.userDao()).seedIfEmpty()
-    }
 
     NavHost(navController = navController, startDestination = Routes.LOGIN) {
 
@@ -117,7 +115,7 @@ fun AppNavigation() {
             DashboardRoute(
                 viewModel = dashboardViewModel,
                 onAddTransaction = { navController.navigate(Routes.addTransaction(userId)) },
-                onSeeAllTransactions = { navController.navigate("transactions") },
+                onSeeAllTransactions = { navController.navigate(Routes.transactions(userId)) },
                 onTransactionClick = { id -> navController.navigate(Routes.editTransaction(id)) },
                 onSearchClick = {},
                 onNotificationsClick = {},
@@ -138,7 +136,22 @@ fun AppNavigation() {
             )
         }
 
-        composable("transactions") { AllTransactionsRoute() }
+        composable(
+            route = Routes.TRANSACTIONS_PATTERN,
+            arguments = listOf(navArgument("userId") { type = NavType.LongType })
+        ) { entry ->
+            val userId = entry.arguments?.getLong("userId") ?: RoomDashboardRepository.DEFAULT_USER_ID
+            val transactionsViewModel: AllTransactionsViewModel = viewModel(
+                factory = AllTransactionsViewModel.Factory(
+                    RoomTransactionRepository(database.transactionDao(), database.userDao()),
+                    userId.toInt()
+                )
+            )
+            AllTransactionsScreen(
+                viewModel = transactionsViewModel,
+                onTransactionClick = { id -> navController.navigate(Routes.editTransaction(id)) }
+            )
+        }
 
         composable(Routes.HOME) {
             Box(
