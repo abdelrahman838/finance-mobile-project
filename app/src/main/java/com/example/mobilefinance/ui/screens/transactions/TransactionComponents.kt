@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,21 +31,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.mobilefinance.data.model.TransactionItem
 import com.example.mobilefinance.data.model.TransactionType
 import com.example.mobilefinance.util.formatShortDate
 import com.example.mobilefinance.util.formatSignedMoney
 import com.example.mobilefinance.util.formatTime
 import com.example.mobilefinance.util.startOfDay
-import com.example.mobilefinance.ui.theme.Green700
-import com.example.mobilefinance.ui.theme.Outline
-import com.example.mobilefinance.ui.theme.Ink
-import com.example.mobilefinance.ui.theme.InkMuted
 
 @Composable
 fun TransactionSearchBar(
@@ -52,10 +46,11 @@ fun TransactionSearchBar(
     onQueryChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = MaterialTheme.colorScheme
     Surface(
         shape = RoundedCornerShape(18.dp),
-        color = Color.White,
-        border = BorderStroke(1.dp, Outline),
+        color = colors.surface,
+        border = BorderStroke(1.dp, colors.outline),
         modifier = modifier
             .fillMaxWidth()
             .height(54.dp)
@@ -64,18 +59,22 @@ fun TransactionSearchBar(
             modifier = Modifier.padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Outlined.Search, contentDescription = null, tint = InkMuted)
+            Icon(Icons.Outlined.Search, contentDescription = null, tint = colors.onSurfaceVariant)
             Spacer(Modifier.width(12.dp))
             Box(Modifier.weight(1f)) {
                 if (query.isEmpty()) {
-                    Text("Search title or note...", color = InkMuted, fontSize = 15.sp)
+                    Text(
+                        "Search title or note...",
+                        color = colors.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
                 }
                 BasicTextField(
                     value = query,
                     onValueChange = onQueryChange,
                     singleLine = true,
-                    textStyle = TextStyle(color = Ink, fontSize = 15.sp),
-                    cursorBrush = SolidColor(Green700),
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(color = colors.onSurface),
+                    cursorBrush = SolidColor(colors.primary),
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -83,7 +82,7 @@ fun TransactionSearchBar(
                 Icon(
                     Icons.Filled.Close,
                     contentDescription = "Clear search",
-                    tint = InkMuted,
+                    tint = colors.onSurfaceVariant,
                     modifier = Modifier
                         .clip(CircleShape)
                         .clickable { onQueryChange("") }
@@ -101,17 +100,17 @@ fun FilterChipPill(
     selected: Boolean,
     onClick: () -> Unit
 ) {
+    val colors = MaterialTheme.colorScheme
     Surface(
         onClick = onClick,
         shape = CircleShape,
-        color = if (selected) Ink else Color.White,
-        border = if (selected) null else BorderStroke(1.dp, Outline)
+        color = if (selected) colors.onSurface else colors.surface,
+        border = if (selected) null else BorderStroke(1.dp, colors.outline)
     ) {
         Text(
             text = text,
-            color = if (selected) Color.White else Ink,
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Medium,
+            color = if (selected) colors.surface else colors.onSurface,
+            style = MaterialTheme.typography.labelLarge,
             modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp)
         )
     }
@@ -127,11 +126,12 @@ fun DropdownPill(
     modifier: Modifier = Modifier,
     trailing: ImageVector? = null
 ) {
+    val colors = MaterialTheme.colorScheme
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(18.dp),
-        color = Color.White,
-        border = BorderStroke(1.dp, Outline),
+        color = colors.surface,
+        border = BorderStroke(1.dp, colors.outline),
         modifier = modifier.height(48.dp)
     ) {
         Row(
@@ -142,15 +142,14 @@ fun DropdownPill(
             Spacer(Modifier.width(8.dp))
             Text(
                 text = text,
-                color = Ink,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.SemiBold,
+                color = colors.onSurface,
+                style = MaterialTheme.typography.labelLarge,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f)
             )
             if (trailing != null) {
-                Icon(trailing, contentDescription = null, tint = InkMuted, modifier = Modifier.size(20.dp))
+                Icon(trailing, contentDescription = null, tint = colors.onSurfaceVariant, modifier = Modifier.size(20.dp))
             }
         }
     }
@@ -160,10 +159,8 @@ fun DropdownPill(
 fun GroupHeader(label: String, total: Double) {
     Text(
         text = "${label.uppercase()}  ·  ${formatSignedMoney(total)}",
-        color = InkMuted,
-        fontSize = 13.sp,
-        fontWeight = FontWeight.SemiBold,
-        letterSpacing = 1.5.sp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        style = MaterialTheme.typography.labelSmall,
         modifier = Modifier.padding(start = 4.dp, top = 20.dp, bottom = 10.dp)
     )
 }
@@ -180,14 +177,15 @@ fun TransactionRow(
     onClick: () -> Unit,
     now: Long = System.currentTimeMillis()
 ) {
-    val style = categoryStyleFor(item.category)
+    val colors = MaterialTheme.colorScheme
     val isIncome = item.type == TransactionType.INCOME
+    val style = categoryStyleFor(item.category, isIncome)
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(shape)
-            .background(Color.White)
+            .background(colors.surface)
             .clickable(onClick = onClick)
     ) {
         Row(
@@ -207,17 +205,16 @@ fun TransactionRow(
             Column(Modifier.weight(1f)) {
                 Text(
                     text = item.title,
-                    color = Ink,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold,
+                    color = colors.onSurface,
+                    style = MaterialTheme.typography.labelLarge,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Spacer(Modifier.height(2.dp))
                 Text(
                     text = subtitleFor(item, now),
-                    color = InkMuted,
-                    fontSize = 13.sp,
+                    color = colors.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -225,21 +222,20 @@ fun TransactionRow(
             Spacer(Modifier.width(8.dp))
             Text(
                 text = formatSignedMoney(item.signedAmount),
-                color = if (isIncome) Green700 else Ink,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold
+                color = if (isIncome) colors.primary else colors.onSurface,
+                style = MaterialTheme.typography.labelLarge
             )
         }
         if (showDivider) {
             HorizontalDivider(
-                color = Outline,
+                color = colors.outline,
                 modifier = Modifier.padding(horizontal = 18.dp)
             )
         }
     }
 }
 
-/** "Groceries · 2:40 PM" for today, "Bills · Oct 22" for older ones. */
+/** "Food · 2:40 PM" for today, "Bills · Oct 22" for older ones. */
 private fun subtitleFor(item: TransactionItem, now: Long): String {
     val date = item.dateMillis ?: return item.category
     val whenText = if (date >= startOfDay(now)) formatTime(date) else formatShortDate(date)
