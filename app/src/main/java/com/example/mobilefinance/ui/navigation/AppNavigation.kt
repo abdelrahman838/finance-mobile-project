@@ -59,11 +59,6 @@ fun AppNavigation() {
     val context = LocalContext.current
     val database = remember(context) { AppDatabase.getDatabase(context) }
 
-    // Seed test rows in Room so database has initial transactions if empty
-    LaunchedEffect(Unit) {
-        RoomTransactionRepository(database.transactionDao(), database.userDao()).seedIfEmpty()
-    }
-
     NavHost(navController = navController, startDestination = Routes.LOGIN) {
 
         composable(Routes.LOGIN) { entry ->
